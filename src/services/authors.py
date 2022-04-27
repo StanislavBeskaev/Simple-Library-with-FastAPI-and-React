@@ -7,6 +7,7 @@ from fastapi import (
     HTTPException,
     status,
 )
+from loguru import logger
 from sqlalchemy.orm import Session
 
 from .. import (
@@ -35,9 +36,11 @@ class AuthorsService:
 
     def create(self, author_data: models.AuthorCreate) -> tables.Author:
         """Создание автора"""
+        logger.debug(f"Попытка создать нового автора, данные: {author_data}")
         author = tables.Author(**author_data.dict())
         self.session.add(author)
         self.session.commit()
+        logger.info(f"Создан новый автор: {author}")
 
         # TODO логи
         # TODO реализовать проверки
