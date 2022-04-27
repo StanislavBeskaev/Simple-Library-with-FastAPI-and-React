@@ -23,6 +23,7 @@ def get_authors(authors_service: AuthorsService = Depends()):
     return authors_service.get_many()
 
 
+# TODO описать 400 код ответа при ошибках валидации
 @router.post(
     "/",
     response_model=models.Author,

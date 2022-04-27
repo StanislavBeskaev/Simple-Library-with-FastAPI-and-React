@@ -1,8 +1,10 @@
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from . import api_library
 from .database import engine
+from .exceptions import LibraryValidationException
 from .tables import Base
 
 
@@ -25,6 +27,6 @@ app.add_middleware(
 app.include_router(api_library.router)
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+@app.exception_handler(LibraryValidationException)
+async def library_validation_exception_handler(request, exc: LibraryValidationException):
+    return JSONResponse(content=exc.errors, status_code=400)
