@@ -38,7 +38,7 @@ class BooksService(BaseService):
         validate_errors = self._validate_book_data(book_data=book_data)
         validate_errors.update(self._validate_create_book_data(book_data=book_data))
         if validate_errors:
-            logger.info(f"Книга не создана, входные данные {book_data}; ошибки валидации: {validate_errors}")
+            logger.warning(f"Книга не создана, входные данные {book_data}; ошибки валидации: {validate_errors}")
             raise LibraryValidationException(errors=validate_errors)
 
         book = tables.Book(**book_data.dict())
@@ -53,6 +53,7 @@ class BooksService(BaseService):
         """Удаление книги по id"""
         book = self.get(book_id=book_id)
         if not book:
+            logger.warning(f"Попытка удалить не существующую книгу {book_id}")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Book with id {book_id} not found"
@@ -61,6 +62,31 @@ class BooksService(BaseService):
         self.session.delete(book)
         self.session.commit()
         logger.info(f"Удалена книга {book}")
+
+    def update(self, book_id: int, book_data: models.BookUpdate) -> tables.Book:
+        """Изменение книги"""
+        logger.debug(f"Попытка изменить книгу {book_id}, данные {book_data}")
+
+        book = self.get(book_id=book_id)
+        if not book:
+            logger.warning(f"Попытка изменить не существующую книгу {book_id}")
+            raise HTTPException(status_code=406, detail=f"Book with id {book_id} does not exist")
+
+        validate_errors = self._validate_book_data(book_data=book_data)
+        validate_errors.update(self._validate_update_book_data(book_data=book_data, book_id=book_id))
+
+        if validate_errors:
+            logger.warning(f"Книга {book_id} не изменена, входные данные {book_data}; ошибки валидации: {validate_errors}")
+            raise LibraryValidationException(errors=validate_errors)
+
+        for attr, value in vars(book_data).items():
+            setattr(book, attr, value)
+
+        self.session.add(book)
+        self.session.commit()
+        logger.info(f"Обновлена книга {book}, текущие параметры {book}")
+
+        return book
 
     # TODO параметры фильтрации
     def _get_books_count(self) -> int:
@@ -83,9 +109,7 @@ class BooksService(BaseService):
 
         return books
 
-
-
-    def _validate_book_data(self, book_data: models.BookCreate) -> dict:
+    def _validate_book_data(self, book_data: models.BookCreate | models.BookUpdate) -> dict:
         errors = {}
 
         if book_data.issue_year <= 0:
@@ -103,6 +127,19 @@ class BooksService(BaseService):
             errors["name"] = ["Книга с таким названием уже существует"]  # такой формат был раньше
 
         if self._get_book_by_isbn(book_isbn=book_data.isbn):
+            errors["isbn"] = ["Книга с таким ISBN уже существует"]  # такой формат был раньше
+
+        return errors
+
+    def _validate_update_book_data(self, book_data: models.BookUpdate, book_id: int) -> dict:
+        errors = {}
+
+        book_with_same_name = self._get_book_by_name(book_name=book_data.name)
+        if book_with_same_name and book_with_same_name.id != book_id:
+            errors["name"] = ["Книга с таким названием уже существует"]  # такой формат был раньше
+
+        book_with_same_isbn = self._get_book_by_isbn(book_isbn=book_data.isbn)
+        if book_with_same_isbn and book_with_same_isbn.id != book_id:
             errors["isbn"] = ["Книга с таким ISBN уже существует"]  # такой формат был раньше
 
         return errors

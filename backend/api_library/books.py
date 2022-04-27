@@ -54,3 +54,15 @@ def delete_book(book_id: int, books_service: BooksService = Depends()):
     books_service.delete(book_id=book_id)
 
     return JSONResponse(content=None, status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.put(
+    "/{book_id}",
+    response_model=models.Book
+)
+def update_book(
+        book_id: int,
+        book_data: models.BookUpdate,
+        books_service: BooksService = Depends()
+):
+    return books_service.update(book_id=book_id, book_data=book_data)

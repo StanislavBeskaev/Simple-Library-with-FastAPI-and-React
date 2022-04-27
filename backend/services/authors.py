@@ -28,7 +28,7 @@ class AuthorsService(BaseService):
 
         validate_errors = self._validate_author_data(author_data=author_data)
         if validate_errors:
-            logger.info(f"Автор не создан, входные данные {author_data}; ошибки валидации: {validate_errors}")
+            logger.warning(f"Автор не создан, входные данные {author_data}; ошибки валидации: {validate_errors}")
             raise LibraryValidationException(errors=validate_errors)
 
         author = tables.Author(**author_data.dict())
