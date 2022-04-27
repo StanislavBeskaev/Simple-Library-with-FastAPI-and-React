@@ -1,22 +1,17 @@
-from fastapi import Depends
 from loguru import logger
-from sqlalchemy.orm import Session
 
 from .. import (
     models,
     tables,
 )
-from ..database import get_session
 from ..exceptions import LibraryValidationException
+from .base_service import BaseService
 
 
-class AuthorsService:
+class AuthorsService(BaseService):
     """Сервис для работы с авторами"""
 
-    def __init__(self, session: Session = Depends(get_session)):
-        self.session = session
-
-    def get_many(self):
+    def get_many(self) -> list[tables.Author]:
         """Получение всех авторов"""
         authors = (
             self.session
