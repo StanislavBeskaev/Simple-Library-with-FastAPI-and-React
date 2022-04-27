@@ -31,3 +31,15 @@ def get_books(books_service: BooksService = Depends()):
 def get_book(book_id: int, books_service: BooksService = Depends()):
     """Получение книги по id"""
     return books_service.get(book_id=book_id)
+
+
+@router.post(
+    "/",
+    response_model=models.Book
+)
+def create_book(
+        book_data: models.BookCreate,
+        books_service: BooksService = Depends()
+):
+    """Создание книги"""
+    return books_service.create(book_data=book_data)

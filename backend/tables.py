@@ -36,5 +36,5 @@ class Book(Base):
     author_rel = relationship('Author', backref='books')
 
     def __str__(self):
-        return f"id:{self.id} name:{self.name} author_id:{self.author_id}" \
+        return f"id:{self.id} name:{self.name} author:{self.author}" \
                f" isbn:{self.id} issue_year:{self.issue_year} page_count:{self.page_count}"
