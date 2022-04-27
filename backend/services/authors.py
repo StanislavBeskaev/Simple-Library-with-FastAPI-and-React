@@ -28,7 +28,7 @@ class AuthorsService:
         authors = (
             self.session
             .query(tables.Author)
-            .order_by(tables.Author.id)
+            .order_by(tables.Author.id.desc())
             .all()
         )
 
