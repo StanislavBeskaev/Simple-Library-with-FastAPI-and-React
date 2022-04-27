@@ -9,7 +9,7 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title='API Библиотеки',
-    description='Получение книг и авторов',
+    description='Работа с книгами и авторами',
     version='0.1.0',
 )
 

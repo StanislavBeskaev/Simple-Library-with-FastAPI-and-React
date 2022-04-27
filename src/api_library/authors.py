@@ -21,3 +21,16 @@ router = APIRouter(
 def get_authors(authors_service: AuthorsService = Depends()):
     """Получение всех авторов"""
     return authors_service.get_many()
+
+
+@router.post(
+    "/",
+    response_model=models.Author,
+    status_code=status.HTTP_201_CREATED
+)
+def create_author(
+        author_data: models.AuthorCreate,
+        authors_service: AuthorsService = Depends()
+):
+    """Создание автора"""
+    return authors_service.create(author_data=author_data)
