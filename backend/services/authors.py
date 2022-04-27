@@ -38,6 +38,16 @@ class AuthorsService(BaseService):
 
         return author
 
+    def get(self, author_id) -> tables.Author:
+        author = (
+            self.session
+            .query(tables.Author)
+            .filter(tables.Author.id == author_id)
+            .first()
+        )
+
+        return author
+
     def _validate_author_data(self, author_data: models.AuthorCreate) -> dict:
         errors = {}
         if author_data.birth_year <= 0:

@@ -20,6 +20,16 @@ class BooksService(BaseService):
             results=self._get_books()
         )
 
+    def get(self, book_id) -> tables.Book:
+        book = (
+            self.session
+            .query(tables.Book)
+            .filter(tables.Book.id == book_id)
+            .first()
+        )
+
+        return book
+
     # TODO параметры фильтрации
     def _get_books_count(self) -> int:
         books_count = (
