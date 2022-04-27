@@ -3,6 +3,7 @@ from fastapi import (
     Depends,
     status,
 )
+from fastapi.responses import JSONResponse
 
 from .. import models
 from ..services.books import BooksService
@@ -24,15 +25,6 @@ def get_books(books_service: BooksService = Depends()):
     return books_service.get_many()
 
 
-@router.get(
-    "/{book_id}",
-    response_model=models.Book
-)
-def get_book(book_id: int, books_service: BooksService = Depends()):
-    """Получение книги по id"""
-    return books_service.get(book_id=book_id)
-
-
 @router.post(
     "/",
     response_model=models.Book
@@ -43,3 +35,22 @@ def create_book(
 ):
     """Создание книги"""
     return books_service.create(book_data=book_data)
+
+
+@router.get(
+    "/{book_id}",
+    response_model=models.Book
+)
+def get_book(book_id: int, books_service: BooksService = Depends()):
+    """Получение книги по id"""
+    return books_service.get(book_id=book_id)
+
+
+@router.delete(
+    "/{book_id}"
+)
+def delete_book(book_id: int, books_service: BooksService = Depends()):
+    """Удаление книги по id"""
+    books_service.delete(book_id=book_id)
+
+    return JSONResponse(content=None, status_code=status.HTTP_204_NO_CONTENT)

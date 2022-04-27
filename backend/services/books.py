@@ -1,3 +1,4 @@
+from fastapi import HTTPException, status
 from loguru import logger
 
 from .. import (
@@ -30,6 +31,37 @@ class BooksService(BaseService):
 
         return book
 
+    def create(self, book_data: models.BookCreate) -> tables.Book:
+        """Создание книги"""
+        logger.debug(f"Попытка создать новую книгу, данные: {book_data}")
+
+        validate_errors = self._validate_book_data(book_data=book_data)
+        validate_errors.update(self._validate_create_book_data(book_data=book_data))
+        if validate_errors:
+            logger.info(f"Книга не создана, входные данные {book_data}; ошибки валидации: {validate_errors}")
+            raise LibraryValidationException(errors=validate_errors)
+
+        book = tables.Book(**book_data.dict())
+        self.session.add(book)
+        self.session.commit()
+
+        logger.info(f"Создана новая книга: {book}")
+
+        return book
+
+    def delete(self, book_id) -> None:
+        """Удаление книги по id"""
+        book = self.get(book_id=book_id)
+        if not book:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Book with id {book_id} not found"
+            )
+
+        self.session.delete(book)
+        self.session.commit()
+        logger.info(f"Удалена книга {book}")
+
     # TODO параметры фильтрации
     def _get_books_count(self) -> int:
         books_count = (
@@ -51,23 +83,7 @@ class BooksService(BaseService):
 
         return books
 
-    def create(self, book_data: models.BookCreate) -> tables.Book:
-        """Создание книги"""
-        logger.debug(f"Попытка создать новую книгу, данные: {book_data}")
 
-        validate_errors = self._validate_book_data(book_data=book_data)
-        validate_errors.update(self._validate_create_book_data(book_data=book_data))
-        if validate_errors:
-            logger.info(f"Книга не создана, входные данные {book_data}; ошибки валидации: {validate_errors}")
-            raise LibraryValidationException(errors=validate_errors)
-
-        book = tables.Book(**book_data.dict())
-        self.session.add(book)
-        self.session.commit()
-
-        logger.info(f"Создана новая книга: {book}")
-
-        return book
 
     def _validate_book_data(self, book_data: models.BookCreate) -> dict:
         errors = {}
