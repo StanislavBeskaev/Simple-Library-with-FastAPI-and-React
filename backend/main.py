@@ -3,12 +3,9 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from . import api_library
-from .database import engine
+from .db_data_handlers import init_db
 from .exceptions import LibraryValidationException
-from .tables import Base
 
-
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title='API Библиотеки',
@@ -25,6 +22,11 @@ app.add_middleware(
 )
 
 app.include_router(api_library.router)
+
+
+@app.on_event("startup")
+def initialize_db():
+    init_db()
 
 
 @app.exception_handler(LibraryValidationException)
