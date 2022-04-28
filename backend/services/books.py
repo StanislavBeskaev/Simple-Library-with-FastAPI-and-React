@@ -37,11 +37,7 @@ class BooksService(BaseService):
         """Создание книги"""
         logger.debug(f"Попытка создать новую книгу, данные: {book_data}")
 
-        validate_errors = self._validate_book_data(book_data=book_data)
-        validate_errors.update(self._validate_create_book_data(book_data=book_data))
-        if validate_errors:
-            logger.warning(f"Книга не создана, входные данные {book_data}; ошибки валидации: {validate_errors}")
-            raise LibraryValidationException(errors=validate_errors)
+        self._validate_create_book_data(book_data=book_data)
 
         book = tables.Book(**book_data.dict())
         self.session.add(book)
@@ -74,12 +70,7 @@ class BooksService(BaseService):
             logger.warning(f"Попытка изменить не существующую книгу {book_id}")
             raise HTTPException(status_code=406, detail=f"Book with id {book_id} does not exist")
 
-        validate_errors = self._validate_book_data(book_data=book_data)
-        validate_errors.update(self._validate_update_book_data(book_data=book_data, book_id=book_id))
-
-        if validate_errors:
-            logger.warning(f"Книга {book_id} не изменена, данные {book_data}; ошибки валидации: {validate_errors}")
-            raise LibraryValidationException(errors=validate_errors)
+        self._validate_update_book_data(book_data=book_data, book_id=book_id)
 
         for attr, value in vars(book_data).items():
             setattr(book, attr, value)
@@ -113,7 +104,6 @@ class BooksService(BaseService):
             book_query = book_query.filter(ilike_op(tables.Book.name, f"%{search_params.name.lower()}%"))
 
         if search_params.issue_year_gte:
-            logger.debug("if search_params.issue_year_gte")
             book_query = book_query.filter(tables.Book.issue_year >= search_params.issue_year_gte)
 
         if search_params.issue_year_lte:
@@ -131,7 +121,7 @@ class BooksService(BaseService):
         return book_query
 
     @staticmethod
-    def _validate_book_data(book_data: models.BookCreate | models.BookUpdate) -> dict:
+    def _get_book_data_errors(book_data: models.BookCreate | models.BookUpdate) -> dict:
         errors = {}
 
         if book_data.issue_year <= 0:
@@ -142,29 +132,33 @@ class BooksService(BaseService):
 
         return errors
 
-    def _validate_create_book_data(self, book_data: models.BookCreate) -> dict:
-        errors = {}
+    def _validate_create_book_data(self, book_data: models.BookCreate) -> None:
+        validate_errors = self._get_book_data_errors(book_data=book_data)
 
         if self._get_book_by_name(book_name=book_data.name):
-            errors["name"] = ["Книга с таким названием уже существует"]  # такой формат был раньше
+            validate_errors["name"] = ["Книга с таким названием уже существует"]  # такой формат был раньше
 
         if self._get_book_by_isbn(book_isbn=book_data.isbn):
-            errors["isbn"] = ["Книга с таким ISBN уже существует"]  # такой формат был раньше
+            validate_errors["isbn"] = ["Книга с таким ISBN уже существует"]  # такой формат был раньше
 
-        return errors
+        if validate_errors:
+            logger.warning(f"Книга не создана, входные данные {book_data}; ошибки валидации: {validate_errors}")
+            raise LibraryValidationException(errors=validate_errors)
 
-    def _validate_update_book_data(self, book_data: models.BookUpdate, book_id: int) -> dict:
-        errors = {}
+    def _validate_update_book_data(self, book_data: models.BookUpdate, book_id: int) -> None:
+        validate_errors = self._get_book_data_errors(book_data=book_data)
 
         book_with_same_name = self._get_book_by_name(book_name=book_data.name)
         if book_with_same_name and book_with_same_name.id != book_id:
-            errors["name"] = ["Книга с таким названием уже существует"]  # такой формат был раньше
+            validate_errors["name"] = ["Книга с таким названием уже существует"]  # такой формат был раньше
 
         book_with_same_isbn = self._get_book_by_isbn(book_isbn=book_data.isbn)
         if book_with_same_isbn and book_with_same_isbn.id != book_id:
-            errors["isbn"] = ["Книга с таким ISBN уже существует"]  # такой формат был раньше
+            validate_errors["isbn"] = ["Книга с таким ISBN уже существует"]  # такой формат был раньше
 
-        return errors
+        if validate_errors:
+            logger.warning(f"Книга {book_id} не изменена, данные {book_data}; ошибки валидации: {validate_errors}")
+            raise LibraryValidationException(errors=validate_errors)
 
     def _get_book_by_name(self, book_name: str) -> tables.Book | None:
         book = (
