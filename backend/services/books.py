@@ -1,5 +1,7 @@
 from fastapi import HTTPException, status
 from loguru import logger
+from sqlalchemy.orm import Query
+from sqlalchemy.sql.operators import ilike_op, desc_op
 
 from .. import (
     models,
@@ -12,13 +14,13 @@ from .base_service import BaseService
 class BooksService(BaseService):
     """Сервис для работы с книгами"""
 
-    # TODO параметры фильтрации
-    def get_many(self) -> models.BookSearchResult:
+    def get_many(self, search_params: models.BookSearchParam) -> models.BookSearchResult:
         """Получение книг с фильтрацией"""
-        # TODO формат {"count": 982, results: [{Book}, {Book}]}
+        logger.debug(f"Получение книг, параметры фильтрации: {search_params}")
+
         return models.BookSearchResult(
-            count=self._get_books_count(),
-            results=self._get_books()
+            count=self._get_books_count(search_params=search_params),
+            results=self._get_books(search_params=search_params)
         )
 
     def get(self, book_id) -> tables.Book:
@@ -76,7 +78,7 @@ class BooksService(BaseService):
         validate_errors.update(self._validate_update_book_data(book_data=book_data, book_id=book_id))
 
         if validate_errors:
-            logger.warning(f"Книга {book_id} не изменена, входные данные {book_data}; ошибки валидации: {validate_errors}")
+            logger.warning(f"Книга {book_id} не изменена, данные {book_data}; ошибки валидации: {validate_errors}")
             raise LibraryValidationException(errors=validate_errors)
 
         for attr, value in vars(book_data).items():
@@ -88,28 +90,48 @@ class BooksService(BaseService):
 
         return book
 
-    # TODO параметры фильтрации
-    def _get_books_count(self) -> int:
-        books_count = (
-            self.session
-            .query(tables.Book)
-            .count()
-        )
+    def _get_books_count(self, search_params: models.BookSearchParam) -> int:
+        books_count = self._get_search_books_query(search_params=search_params).count()
 
         return books_count
 
-    # TODO параметры фильтрации
-    def _get_books(self) -> list[tables.Book]:
+    def _get_books(self, search_params: models.BookSearchParam) -> list[tables.Book]:
         books = (
-            self.session
-            .query(tables.Book)
-            .order_by(tables.Book.id.desc())
+            self._get_search_books_query(search_params=search_params)
+            .order_by(desc_op(tables.Book.id))
+            .offset((search_params.page - 1) * search_params.page_size)
+            .limit(search_params.page_size)
             .all()
         )
 
         return books
 
-    def _validate_book_data(self, book_data: models.BookCreate | models.BookUpdate) -> dict:
+    def _get_search_books_query(self, search_params: models.BookSearchParam) -> Query:
+        book_query = self.session.query(tables.Book)
+
+        if search_params.name:
+            book_query = book_query.filter(ilike_op(tables.Book.name, f"%{search_params.name.lower()}%"))
+
+        if search_params.issue_year_gte:
+            logger.debug("if search_params.issue_year_gte")
+            book_query = book_query.filter(tables.Book.issue_year >= search_params.issue_year_gte)
+
+        if search_params.issue_year_lte:
+            book_query = book_query.filter(tables.Book.issue_year <= search_params.issue_year_lte)
+
+        if search_params.page_count_gte:
+            book_query = book_query.filter(tables.Book.page_count >= search_params.page_count_gte)
+
+        if search_params.page_count_lte:
+            book_query = book_query.filter(tables.Book.page_count <= search_params.page_count_lte)
+
+        if search_params.author:
+            book_query = book_query.filter(tables.Book.author == search_params.author)
+
+        return book_query
+
+    @staticmethod
+    def _validate_book_data(book_data: models.BookCreate | models.BookUpdate) -> dict:
         errors = {}
 
         if book_data.issue_year <= 0:

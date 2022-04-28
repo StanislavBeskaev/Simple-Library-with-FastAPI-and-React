@@ -1,4 +1,5 @@
 from loguru import logger
+from sqlalchemy.sql.operators import desc_op
 
 from .. import (
     models,
@@ -16,7 +17,7 @@ class AuthorsService(BaseService):
         authors = (
             self.session
             .query(tables.Author)
-            .order_by(tables.Author.id.desc())
+            .order_by(desc_op(tables.Author.id))
             .all()
         )
 

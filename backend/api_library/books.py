@@ -15,14 +15,16 @@ router = APIRouter(
 )
 
 
-# TODO параметры фильтрации
 @router.get(
     "/",
     response_model=models.BookSearchResult
 )
-def get_books(books_service: BooksService = Depends()):
+def get_books(
+        search_params: models.BookSearchParam = Depends(),
+        books_service: BooksService = Depends()
+):
     """Получение книг"""
-    return books_service.get_many()
+    return books_service.get_many(search_params=search_params)
 
 
 @router.post(
@@ -65,4 +67,5 @@ def update_book(
         book_data: models.BookUpdate,
         books_service: BooksService = Depends()
 ):
+    """Обновление книги"""
     return books_service.update(book_id=book_id, book_data=book_data)

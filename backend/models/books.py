@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class BaseBook(BaseModel):
@@ -27,3 +27,14 @@ class Book(BaseBook):
 class BookSearchResult(BaseModel):
     count: int
     results: list[Book]
+
+
+class BookSearchParam(BaseModel):
+    name: str | None
+    issue_year_gte: int | None = Field(alias="issue_year__gte")
+    issue_year_lte: int | None = Field(alias="issue_year__lte")
+    page_count_gte: int | None = Field(alias="page_count__gte")
+    page_count_lte: int | None = Field(alias="page_count__lte")
+    author: int | None
+    page: int = Field(1)
+    page_size: int = Field(20)

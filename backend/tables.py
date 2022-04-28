@@ -37,4 +37,4 @@ class Book(Base):
 
     def __str__(self):
         return f"id:{self.id} name:{self.name} author:{self.author}" \
-               f" isbn:{self.id} issue_year:{self.issue_year} page_count:{self.page_count}"
+               f" isbn:{self.isbn} issue_year:{self.issue_year} page_count:{self.page_count}"

@@ -6,5 +6,6 @@ from .books import (
     Book,
     BookCreate,
     BookUpdate,
-    BookSearchResult
+    BookSearchResult,
+    BookSearchParam
 )
