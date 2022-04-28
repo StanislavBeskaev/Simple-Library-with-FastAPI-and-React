@@ -1,12 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./library.db"
+SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@127.0.0.1:5432/postgres"
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    connect_args={'check_same_thread': False},
-)
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
 Session = sessionmaker(
     engine,
