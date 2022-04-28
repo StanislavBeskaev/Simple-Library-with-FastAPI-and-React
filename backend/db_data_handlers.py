@@ -76,6 +76,12 @@ def load_books_from_json(session: Session, books_file: str) -> None:
     session.commit()
     logger.info(f"Книги записаны в базу из файла {books_file}")
 
+    _set_sequence_value(
+        session=session,
+        sequence_name="books_id_seq",
+        restart_value=len(books) + 1
+    )
+
 
 def load_authors_from_json(session: Session, authors_file: str) -> None:
     authors = parse_file_as(list[models.Author], authors_file)
@@ -85,3 +91,15 @@ def load_authors_from_json(session: Session, authors_file: str) -> None:
 
     session.commit()
     logger.info(f"Авторы записаны в базу из файла {authors_file}")
+
+    _set_sequence_value(
+        session=session,
+        sequence_name="authors_id_seq",
+        restart_value=len(authors) + 1
+    )
+
+
+def _set_sequence_value(session: Session, sequence_name: str, restart_value: int) -> None:
+    session.execute(f"alter sequence {sequence_name} restart with {restart_value}")
+    session.commit()
+    logger.info(f"Для последовательности {sequence_name} установлено значение {restart_value}")
