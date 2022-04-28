@@ -1,10 +1,18 @@
 [
   {
     "name": "Война и мир",
-    "author": 101,
+    "author": 1,
     "isbn": "a-123asd-b",
     "issue_year": 1789,
     "page_count": 1234,
     "id": 1
+  },
+  {
+    "name": "Гарри Поттер и философский камень",
+    "author": 2,
+    "isbn": "JKR-HP-1997",
+    "issue_year": 1997,
+    "page_count": 270,
+    "id": 2
   }
 ]
