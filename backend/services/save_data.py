@@ -3,8 +3,11 @@ import json
 from loguru import logger
 from sqlalchemy.orm import Session
 
-from . import tables
-from . import models
+from .. import tables
+from .. import models
+
+
+# TODO реализовать сервис для получения json файлов с данными таблиц
 
 
 def save_authors_from_db(session: Session, authors_file: str) -> None:
