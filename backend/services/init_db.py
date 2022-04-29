@@ -171,28 +171,32 @@ class TestInitDataLoader(BaseInitDataLoader):
 
     def _generate_test_authors(self) -> None:
         """Генерация тестовых данных по авторам"""
-        for i in range(1, self.authors_amount + 1):
-            self.session.add(
-                tables.Author(
-                    name=f"Имя тестового автора {i}",
-                    surname=f"Фамилия тестового автора {i}",
-                    birth_year=random.randrange(1, 2000)
-                )
-            )
+        logger.debug(f"Генерируем {self.authors_amount} тестовых авторов")
+        test_authors = [
+            tables.Author(
+                name=f"Имя тестового автора {i}",
+                surname=f"Фамилия тестового автора {i}",
+                birth_year=random.randrange(1, 2001)
+            ) for i in range(1, self.authors_amount + 1)
+        ]
+        logger.debug(f"Сформирован список {self.authors_amount} авторов для вставки в базу")
+        self.session.bulk_save_objects(test_authors)
         self.session.commit()
         logger.info(f"Сгенерировано {self.authors_amount} тестовых авторов")
 
     def _generate_test_books(self) -> None:
         """Генерация тестовых данных по книгам"""
-        for i in range(1, self.books_amount + 1):
-            self.session.add(
-                tables.Book(
-                    name=f"Тестовая книга {i}",
-                    author=random.randrange(1, self.authors_amount),
-                    isbn=f"test_isbn_{i}",
-                    issue_year=random.randrange(1, 1991),
-                    page_count=random.randrange(1, 749)
-                )
-            )
+        logger.debug(f"Генерируем {self.books_amount} тестовых книг")
+        test_books = [
+            tables.Book(
+                name=f"Тестовая книга {i}",
+                author=random.randrange(1, self.authors_amount + 1),
+                isbn=f"test_isbn_{i}",
+                issue_year=random.randrange(1, 1991),
+                page_count=random.randrange(1, 749)
+            ) for i in range(1, self.books_amount + 1)
+        ]
+        logger.debug(f"Сформирован список {self.books_amount} книг для вставки в базу")
+        self.session.bulk_save_objects(test_books)
         self.session.commit()
         logger.info(f"Сгенерировано {self.books_amount} тестовых книг")
