@@ -1,0 +1,110 @@
+@import "~bootstrap/scss/bootstrap";
+
+.delete-confirm-layout {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0;
+  background-color: rgba(0, 0, 0, .7);
+  transition: 300ms ease-in-out;
+  z-index: 10000;
+  pointer-events: none;
+}
+
+.delete-confirm-modal {
+  position: fixed;
+  top: -20%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: 400ms ease-in-out;
+  background-color: #FFF;
+  z-index: 10000;
+}
+
+.delete-confirm-layout.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.delete-confirm-modal.active {
+  transform: translate(-50%, 250%);
+}
+
+.book-search {
+  width: calc(min(80%, 650px))
+}
+
+.number-input{
+  width: 90px;
+  text-align: center;
+}
+
+.number-input.year-group {
+  width: 195px;
+}
+
+.number-input.page-group {
+  width: 175px;
+}
+
+.input-splitter {
+  width: 30px !important;
+  border-left: 0;
+  border-right: 0;
+  pointer-events: none;
+}
+
+.notification-list {
+  position: fixed;
+  top: 100px;
+  right: 50px;
+  z-index: 10000;
+}
+
+.notification-item {
+  position: relative;
+  width: 250px;
+  min-height: 30px;
+  padding: 15px;
+  margin-bottom: 10px;
+  border: #ccc solid 1px;
+  border-radius: 5px;
+  color: white;
+  font-size: 15px;
+  transition: all 0.5s ease-in;
+}
+
+.notification-close-btn {
+  position: absolute;
+  top: 0;
+  right: 5px;
+  color: white;
+  font-size: 20px;
+}
+
+.notification-close-btn:hover{
+  cursor: pointer;
+}
+
+@keyframes slide {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+.animated {
+  animation: slide 0.4s linear 0s 1;
+}
+
+.animated-back {
+  transform: translateX(300%);
+}
+
+.bg-orange {
+  background-color: orange;
+}
