@@ -10,3 +10,13 @@ services:
     restart: always
     ports:
       - "5432:5432"
+  app:
+    depends_on:
+      - postgresql
+    container_name: "fastapi_library_app"
+    env_file:
+      - .env
+    build:
+      context: .
+    ports:
+      - "8001:8000"

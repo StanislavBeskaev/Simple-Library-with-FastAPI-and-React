@@ -49,7 +49,7 @@ class DBInitializer:
             test_init_data_loader.load_init_data()
         else:
             message = f"Неожиданное значение для переменной окружения {INIT_DATA_TYPE_VAR} передано значение " \
-                      f" {init_data_type}, должно начинаться" \
+                      f" '{init_data_type}', должно начинаться" \
                       f" с {JSON_INIT_DATA_TYPE_PREFIX} или {TEST_INIT_DATA_TYPE_PREFIX}"
             logger.error(message)
             raise ValueError(message)
@@ -151,7 +151,7 @@ class TestInitDataLoader(BaseInitDataLoader):
         if not match_amounts:
             raise ValueError(
                 f"Не удалось получить кол-во авторов и книг из значения переменной окружения {INIT_DATA_TYPE_VAR},"
-                f" передано значение {self.init_data_type}. Должен быть формат: test_<кол-во авторов>_<кол-во книг>"
+                f" передано значение '{self.init_data_type}'. Должен быть формат: test_<кол-во авторов>_<кол-во книг>"
             )
 
         authors_amount = int(match_amounts.group("authors"))
@@ -159,7 +159,7 @@ class TestInitDataLoader(BaseInitDataLoader):
         if any([amount == 0 for amount in (authors_amount, books_amount)]):
             raise ValueError(
                 f"Не удалось получить кол-во авторов и книг из значения переменной окружения {INIT_DATA_TYPE_VAR},"
-                f" передано значение {self.init_data_type}. Нужно указать положительные количества авторов и книг"
+                f" передано значение '{self.init_data_type}'. Нужно указать положительные количества авторов и книг"
             )
 
         return authors_amount, books_amount
