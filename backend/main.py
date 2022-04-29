@@ -1,9 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
+from .services.init_db import DBInitializer
 from . import api_library
-from .db_data_handlers import init_db
 from .exceptions import LibraryValidationException
 
 
@@ -26,7 +26,7 @@ app.include_router(api_library.router)
 
 @app.on_event("startup")
 def initialize_db():
-    init_db()
+    DBInitializer().init_db()
 
 
 @app.exception_handler(LibraryValidationException)
