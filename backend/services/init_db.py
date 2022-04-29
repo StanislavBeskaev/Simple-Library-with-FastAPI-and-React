@@ -1,5 +1,6 @@
 import os
 import random
+import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
@@ -61,6 +62,7 @@ class DBInitializer:
 
 class BaseInitDataLoader(ABC):
     """Базовый класс для загрузки первоначальных данных в базу"""
+
     def __init__(self, session: Session, init_data_type: str):
         self.session = session
         self.init_data_type = init_data_type
@@ -135,24 +137,32 @@ class JsonInitDataLoader(BaseInitDataLoader):
 
 class TestInitDataLoader(BaseInitDataLoader):
     """Класс для загрузки тестовых первоначальных данных в базу"""
+
     def __init__(self, session: Session, init_data_type: str):
         super().__init__(session=session, init_data_type=init_data_type)
-        # TODO заменить на регулярочку и функцию выделения количеств
-        init_data_type_parts = init_data_type.split("_")
-        if len(init_data_type_parts) != 3:
-            message = f"Некорректное значение для переменной окружения {INIT_DATA_TYPE_VAR}," \
-                      f"передано значение {init_data_type}" \
-                      f", для типа {TEST_INIT_DATA_TYPE_PREFIX} должен быть формат: test_<кол-во авторов>_<кол-во книг>"
-            logger.error(message)
-            raise ValueError(message)
 
-        try:
-            self.authors_amount = int(init_data_type_parts[1])
-            self.books_amount = int(init_data_type_parts[2])
-        except ValueError:
-            message = f"Не удалось получить кол-во авторов и книг из значения переменной окружения {INIT_DATA_TYPE_VAR}," \
-                      f" передано значение {init_data_type}. Должен быть формат: test_<кол-во авторов>_<кол-во книг>"
-            raise ValueError(message)
+        self.authors_amount, self.books_amount = self._parse_test_init_data_type()
+
+    def _parse_test_init_data_type(self) -> tuple[int, int]:
+        """Парсинг тестового типа инициализации данных, валидация и выделения кол-ва авторов и книг"""
+        pattern = r"^test_(?P<authors>\d+)_(?P<books>\d+)$"
+
+        match_amounts = re.match(pattern=pattern, string=self.init_data_type)
+        if not match_amounts:
+            raise ValueError(
+                f"Не удалось получить кол-во авторов и книг из значения переменной окружения {INIT_DATA_TYPE_VAR},"
+                f" передано значение {self.init_data_type}. Должен быть формат: test_<кол-во авторов>_<кол-во книг>"
+            )
+
+        authors_amount = int(match_amounts.group("authors"))
+        books_amount = int(match_amounts.group("books"))
+        if any([amount == 0 for amount in (authors_amount, books_amount)]):
+            raise ValueError(
+                f"Не удалось получить кол-во авторов и книг из значения переменной окружения {INIT_DATA_TYPE_VAR},"
+                f" передано значение {self.init_data_type}. Нужно указать положительные количества авторов и книг"
+            )
+
+        return authors_amount, books_amount
 
     def load_init_data(self) -> None:
         """Загрузка первоначальных тестовых данных таблиц"""
