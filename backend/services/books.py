@@ -9,6 +9,7 @@ from .. import (
 )
 from ..exceptions import LibraryValidationException
 from .base_service import BaseService
+from .ws_notifications import WSConnectionManager, Notification, NotificationType
 
 
 class BooksService(BaseService):
@@ -45,6 +46,10 @@ class BooksService(BaseService):
 
         logger.info(f"Создана новая книга: {book}")
 
+        WSConnectionManager().send_notification(
+            Notification(type=NotificationType.SUCCESS, text=f"Создана новая книга: {book.name}")
+        )
+
         return book
 
     def delete(self, book_id) -> None:
@@ -59,7 +64,11 @@ class BooksService(BaseService):
 
         self.session.delete(book)
         self.session.commit()
+
         logger.info(f"Удалена книга {book}")
+        WSConnectionManager().send_notification(
+            Notification(type=NotificationType.ERROR, text=f"Удалена книга {book.name}")
+        )
 
     def update(self, book_id: int, book_data: models.BookUpdate) -> tables.Book:
         """Изменение книги"""
@@ -77,7 +86,11 @@ class BooksService(BaseService):
 
         self.session.add(book)
         self.session.commit()
-        logger.info(f"Обновлена книга {book}, текущие параметры {book}")
+
+        logger.info(f"Изменена книга {book}, текущие параметры {book}")
+        WSConnectionManager().send_notification(
+            Notification(type=NotificationType.WARNING, text=f"Изменена книга {book.name}")
+        )
 
         return book
 

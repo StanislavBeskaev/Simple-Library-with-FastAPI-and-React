@@ -1,12 +1,14 @@
 import os
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
+from loguru import logger
 
 from .services.init_db import DBInitializer
+from .services.ws_notifications import WSConnectionManager
 from . import api_library
 from .exceptions import LibraryValidationException
 
@@ -39,5 +41,26 @@ async def library_validation_exception_handler(request, exc: LibraryValidationEx
 
 
 fronted_build_folder = os.path.join(Path(__file__).resolve().parent.parent, "frontend", "build")
+static_files_folder = os.path.join(fronted_build_folder, "static")
 
-app.mount('/', StaticFiles(directory=fronted_build_folder, html=True), name='frontend')
+app.mount('/static', StaticFiles(directory=static_files_folder), name='static')
+
+
+@app.get("/")
+def index():
+    # если делать mount всей папки build, то не работают ws
+    with open(os.path.join(fronted_build_folder, "index.html"), mode="r") as file:
+        content = file.read()
+    return HTMLResponse(content)
+
+
+@app.websocket("/ws/notifications")
+async def websocket_endpoint(websocket: WebSocket):
+    manager = WSConnectionManager()
+    await manager.connect(websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            logger.debug(f"message from ws: {data}")
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)

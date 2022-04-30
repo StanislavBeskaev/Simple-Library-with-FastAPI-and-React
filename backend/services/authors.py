@@ -7,6 +7,7 @@ from .. import (
 )
 from ..exceptions import LibraryValidationException
 from .base_service import BaseService
+from .ws_notifications import WSConnectionManager, Notification, NotificationType
 
 
 class AuthorsService(BaseService):
@@ -32,7 +33,14 @@ class AuthorsService(BaseService):
         author = tables.Author(**author_data.dict())
         self.session.add(author)
         self.session.commit()
+
         logger.info(f"Создан новый автор: {author}")
+        WSConnectionManager().send_notification(
+            Notification(
+                type=NotificationType.SUCCESS,
+                text=f"Создан новый автор: {author.name} {author.surname}, {author.birth_year}"
+            )
+        )
 
         return author
 
