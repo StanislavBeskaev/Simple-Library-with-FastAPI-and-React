@@ -14,8 +14,9 @@ services:
     depends_on:
       - postgresql
     container_name: "fastapi_library_app"
-    env_file:
-      - .env
+    environment:
+      - INIT_DATA_TYPE=test_1000_100000
+      - PG_HOST=postgresql
     build:
       context: .
     ports:
