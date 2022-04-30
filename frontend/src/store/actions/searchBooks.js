@@ -143,9 +143,10 @@ export function searchBooks() {
     dispatch(startBooksLoading())
     try {
       const response = await axios.get(`books/?${makeSearchString()}`)
-      console.log('book search response', response)
+
       dispatch(setBooks(response.data.results))
       dispatch(setBookCount(response.data.count))
+
       if (!searched) dispatch(setBooksSearched(true))
       if (error) dispatch(setBooksSearchError(false))
     } catch (e) {

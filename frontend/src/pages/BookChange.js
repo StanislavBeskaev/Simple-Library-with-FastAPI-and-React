@@ -7,8 +7,6 @@ import Error from "../components/Error"
 import AuthorSelect from "../components/AuthorSelect"
 import {searchBooks} from "../store/actions/searchBooks"
 import {connect} from "react-redux"
-import {addNotification} from "../store/actions/notification"
-import withNotifications from "../hoc/Notifications"
 
 
 const BookChange = (props) => {
@@ -100,7 +98,6 @@ const BookChange = (props) => {
     axios.put(`/books/${bookId}`, data)
       .then(() => {
         props.searchBooks()
-        props.addNotification({text: `Изменена книга: ${name}`, type: "orange"})
         navigate(`/books/${bookId}`)
       })
       .catch(e => {
@@ -161,9 +158,8 @@ const BookChange = (props) => {
 
 function mapDispatchToProps(dispatch) {
   return {
-    searchBooks: () => dispatch(searchBooks()),
-    addNotification: notification => dispatch(addNotification(notification)),
+    searchBooks: () => dispatch(searchBooks())
   }
 }
 
-export default withNotifications(connect(null, mapDispatchToProps)(BookChange))
+export default connect(null, mapDispatchToProps)(BookChange)

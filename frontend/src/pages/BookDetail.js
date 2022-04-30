@@ -7,8 +7,6 @@ import {searchBooks} from "../store/actions/searchBooks"
 import {connect} from "react-redux"
 import {setDeleteConfirmModalText, showDeleteConfirmModal} from "../store/actions/deleteConfirm"
 import DeleteConfirmModal from "../components/modals/DeleteConfirmModal"
-import withNotifications from "../hoc/Notifications"
-import {addNotification} from "../store/actions/notification"
 
 
 const BookDetail = (props) => {
@@ -40,7 +38,6 @@ const BookDetail = (props) => {
   const onDelete = () => {
     axios.delete(`/books/${bookId}`)
       .then(res => {
-        props.addNotification({type: "danger", text: `Удалена книга: ${book.name}`})
         props.searchBooks()
         navigate('/')
       })
@@ -100,9 +97,8 @@ function mapDispatchToProps(dispatch) {
   return {
     searchBooks: () => dispatch(searchBooks()),
     showDeleteConfirmModal: () => dispatch(showDeleteConfirmModal()),
-    setDeleteConfirmModalText: text => dispatch(setDeleteConfirmModalText(text)),
-    addNotification: notification => dispatch(addNotification(notification)),
+    setDeleteConfirmModalText: text => dispatch(setDeleteConfirmModalText(text))
   }
 }
 
-export default withNotifications(connect(null, mapDispatchToProps)(BookDetail))
+export default connect(null, mapDispatchToProps)(BookDetail)

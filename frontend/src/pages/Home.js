@@ -4,7 +4,6 @@ import {connect} from "react-redux"
 import BookSearch from "../components/Home/BookSearch"
 import BookResult from "../components/Home/BookResult"
 import Error from "../components/Error"
-import withNotifications from "../hoc/Notifications"
 
 
 const Home = (props) => (
@@ -24,5 +23,5 @@ function mapStateToProps(state) {
   }
 }
 
-export default withNotifications(connect(mapStateToProps)(Home))
+export default connect(mapStateToProps)(Home)
 

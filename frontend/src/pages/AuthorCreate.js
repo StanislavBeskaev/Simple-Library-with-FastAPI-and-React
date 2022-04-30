@@ -3,8 +3,6 @@ import FormInput from "../components/FormInput"
 import axios from "../axios/axios-dj-api"
 import {useNavigate} from "react-router-dom"
 import Error from "../components/Error"
-import withNotifications from "../hoc/Notifications"
-import {addNotification} from "../store/actions/notification"
 import {connect} from "react-redux"
 import {loadAuthors} from "../store/actions/searchBooks"
 
@@ -59,7 +57,6 @@ const AuthorCreate = (props) => {
     axios.post('/authors/', data)
       .then(() => {
         props.loadAuthors()
-        props.addNotification({type: "success", text: `Добавлен автор: ${name} ${surname}`})
         navigate('/')
       })
       .catch(e => {
@@ -93,9 +90,8 @@ const AuthorCreate = (props) => {
 
 function mapDispatchToProps(dispatch) {
   return {
-    addNotification: notification => dispatch(addNotification(notification)),
     loadAuthors: () => dispatch(loadAuthors())
   }
 }
 
-export default withNotifications(connect(null, mapDispatchToProps)(AuthorCreate))
+export default connect(null, mapDispatchToProps)(AuthorCreate)

@@ -8,8 +8,6 @@ import AuthorSelect from "../components/AuthorSelect"
 import Error from "../components/Error"
 import {searchBooks} from "../store/actions/searchBooks"
 import {connect} from "react-redux"
-import withNotifications from "../hoc/Notifications"
-import {addNotification} from "../store/actions/notification"
 
 
 const BookCreate = (props) => {
@@ -89,7 +87,6 @@ const BookCreate = (props) => {
 
     axios.post('/books/', data)
       .then(() => {
-        props.addNotification({type: "success", text: `Добавлена книга ${name}`})
         props.searchBooks()
         navigate('/')
       })
@@ -146,8 +143,7 @@ const BookCreate = (props) => {
 function mapDispatchToProps(dispatch) {
   return {
     searchBooks: () => dispatch(searchBooks()),
-    addNotification: notification => dispatch(addNotification(notification)),
   }
 }
 
-export default withNotifications(connect(null, mapDispatchToProps)(BookCreate))
+export default connect(null, mapDispatchToProps)(BookCreate)
