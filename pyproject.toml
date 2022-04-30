@@ -7,11 +7,12 @@ authors = ["Your Name <you@example.com>"]
 [tool.poetry.dependencies]
 python = "^3.10"
 fastapi = "^0.75.2"
-uvicorn = "^0.17.6"
+uvicorn = {extras = ["standard"], version = "^0.17.6"}
 SQLAlchemy = "^1.4.36"
 loguru = "^0.6.0"
 requests = "^2.27.1"
 psycopg2-binary = "2.9.1"
+websockets = "^10.3"
 
 [tool.poetry.dev-dependencies]
 

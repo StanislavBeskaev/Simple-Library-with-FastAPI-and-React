@@ -1,10 +1,11 @@
 import os
 from pathlib import Path
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from loguru import logger
 
 from .services.init_db import DBInitializer
@@ -40,20 +41,6 @@ async def library_validation_exception_handler(request, exc: LibraryValidationEx
     return JSONResponse(content=exc.errors, status_code=400)
 
 
-fronted_build_folder = os.path.join(Path(__file__).resolve().parent.parent, "frontend", "build")
-static_files_folder = os.path.join(fronted_build_folder, "static")
-
-app.mount('/static', StaticFiles(directory=static_files_folder), name='static')
-
-
-@app.get("/")
-def index():
-    # если делать mount всей папки build, то не работают ws
-    with open(os.path.join(fronted_build_folder, "index.html"), mode="r") as file:
-        content = file.read()
-    return HTMLResponse(content)
-
-
 @app.websocket("/ws/notifications")
 async def websocket_endpoint(websocket: WebSocket):
     manager = WSConnectionManager()
@@ -64,3 +51,20 @@ async def websocket_endpoint(websocket: WebSocket):
             logger.debug(f"message from ws: {data}")
     except WebSocketDisconnect:
         manager.disconnect(websocket)
+
+
+fronted_build_folder = Path(os.path.join(Path(__file__).resolve().parent.parent, "frontend", "build"))
+templates = Jinja2Templates(directory=fronted_build_folder.as_posix())
+
+app.mount(
+    "/static/",
+    StaticFiles(directory=os.path.join(fronted_build_folder, "static")),
+    name="React App static files",
+)
+
+
+@app.get("/{full_path:path}", include_in_schema=False)
+async def serve_react_app(request: Request, full_path: str):
+    """Endpoint для отрисовки React приложения"""
+    logger.debug(f"serve_react_app, full_path: {full_path}")
+    return templates.TemplateResponse("index.html", {"request": request})

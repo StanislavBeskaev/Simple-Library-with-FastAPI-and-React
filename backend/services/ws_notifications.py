@@ -40,6 +40,8 @@ class WSConnectionManager:
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
         self.active_connections.append(websocket)
+        logger.debug(f"{self.__class__.__name__} новое ws соединение,"
+                     f" в списке уже {len(self.active_connections)} соединений")
 
     def disconnect(self, websocket: WebSocket):
         self.active_connections.remove(websocket)
