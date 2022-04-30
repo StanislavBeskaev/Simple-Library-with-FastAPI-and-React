@@ -17,6 +17,7 @@ services:
     environment:
       - INIT_DATA_TYPE=test_1000_100000
       - PG_HOST=postgresql
+      - REACT_APP_WS_ADDRESS=localhost:8001
     build:
       context: .
     ports:

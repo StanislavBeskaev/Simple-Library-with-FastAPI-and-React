@@ -16,7 +16,6 @@ RUN apt-get update
 RUN apt-get install -y nodejs npm
 WORKDIR /app/frontend
 RUN npm install
-RUN npm run build
 
 COPY backend /app/backend
 COPY poetry.lock pyproject.toml entrypoint.sh /app/

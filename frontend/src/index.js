@@ -44,7 +44,6 @@ ReactDOM.render(app, document.getElementById('root'))
 reportWebVitals()
 
 const wsConnectString = `ws://${process.env.REACT_APP_WS_ADDRESS}/ws/notifications`
-console.log(`wsConnectString = ${wsConnectString}`)
 const ws = new WebSocket(wsConnectString)
 const NOTIFICATION_TIME = 4000
 
