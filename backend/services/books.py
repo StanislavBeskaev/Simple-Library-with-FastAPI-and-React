@@ -21,8 +21,19 @@ class BooksService(BaseService):
 
         return models.BookSearchResult(
             count=self._get_books_count(search_params=search_params),
-            results=self._get_books(search_params=search_params)
+            results=self.get_books_by_search_params(search_params=search_params)
         )
+
+    def get_books_by_search_params(self, search_params: models.BookSearchParam) -> list[tables.Book]:
+        books = (
+            self._get_search_books_query(search_params=search_params)
+            .order_by(desc_op(tables.Book.id))
+            .offset((search_params.page - 1) * search_params.page_size)
+            .limit(search_params.page_size)
+            .all()
+        )
+
+        return books
 
     def get(self, book_id) -> tables.Book:
         book = (
@@ -98,17 +109,6 @@ class BooksService(BaseService):
         books_count = self._get_search_books_query(search_params=search_params).count()
 
         return books_count
-
-    def _get_books(self, search_params: models.BookSearchParam) -> list[tables.Book]:
-        books = (
-            self._get_search_books_query(search_params=search_params)
-            .order_by(desc_op(tables.Book.id))
-            .offset((search_params.page - 1) * search_params.page_size)
-            .limit(search_params.page_size)
-            .all()
-        )
-
-        return books
 
     def _get_search_books_query(self, search_params: models.BookSearchParam) -> Query:
         book_query = self.session.query(tables.Book)
