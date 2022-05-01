@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from ..database import engine, get_session
 from .. import models
+from ..settings import settings
 from .. import tables
 
 
@@ -33,7 +34,7 @@ class DBInitializer:
 
         logger.info("init_db база пустая")
 
-        init_data_type = os.environ.get(INIT_DATA_TYPE_VAR)
+        init_data_type = settings.init_data_type
         if not init_data_type:
             logger.info(f"Не задана переменная окружения {INIT_DATA_TYPE_VAR}."
                         f" Начальные данные в базу не загружаются")
