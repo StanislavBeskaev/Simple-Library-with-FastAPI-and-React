@@ -6,7 +6,7 @@ from fastapi import (
 
 from .. import models
 from ..services.authors import AuthorsService
-from .responses.authors import author_create_responses
+from .responses import authors as authors_responses
 
 
 router = APIRouter(
@@ -15,10 +15,10 @@ router = APIRouter(
 )
 
 
-# TODO пример
 @router.get(
     "/",
-    response_model=list[models.Author]
+    response_model=list[models.Author],
+    responses=authors_responses.get_authors_responses
 )
 def get_authors(authors_service: AuthorsService = Depends()):
     """Получение всех авторов"""
@@ -29,7 +29,7 @@ def get_authors(authors_service: AuthorsService = Depends()):
     "/",
     response_model=models.Author,
     status_code=status.HTTP_201_CREATED,
-    responses=author_create_responses
+    responses=authors_responses.author_create_responses
 )
 def create_author(
         author_data: models.AuthorCreate,

@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 from .. import models
 from .. import dependencies
 from ..services.books import BooksService
-from .responses.books import get_books_responses
+from .responses import books as books_responses
 
 
 router = APIRouter(
@@ -21,7 +21,7 @@ router = APIRouter(
 @router.get(
     "/",
     response_model=models.BookSearchResult,
-    responses=get_books_responses
+    responses=books_responses.get_books_responses
 )
 def get_books(
         search_params: dependencies.BookSearchParam = Depends(),

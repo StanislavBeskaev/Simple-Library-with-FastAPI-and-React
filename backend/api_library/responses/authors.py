@@ -1,6 +1,5 @@
 from ... import models
 
-
 author_create_responses = {
     201: {
         "description": "Успешное создание автора",
@@ -18,5 +17,35 @@ author_create_responses = {
     400: {
         "model": models.AuthorCreateValidationError,
         "description": "Ошибки валидации данных"
+    }
+}
+
+get_authors_responses = {
+    200: {
+        "description": "Информация об авторах в библиотеке",
+        "content": {
+            "application/json": {
+                "example": [
+                    {
+                        "name": "Автор",
+                        "surname": "Первый",
+                        "birth_year": 1,
+                        "id": 1
+                    },
+                    {
+                        "name": "Автор",
+                        "surname": "Второй",
+                        "birth_year": 2,
+                        "id": 2
+                    },
+                    {
+                        "name": "Александр",
+                        "surname": "Пушкин",
+                        "birth_year": 1799,
+                        "id": 7
+                    },
+                ]
+            }
+        }
     }
 }
