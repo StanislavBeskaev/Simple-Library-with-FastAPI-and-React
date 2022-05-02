@@ -139,10 +139,10 @@ class BooksService(BaseService):
         errors = {}
 
         if book_data.issue_year <= 0:
-            errors["issue_year"] = ["Год выпуска должен быть больше 0"]  # такой формат был раньше
+            errors["issue_year"] = "Год выпуска должен быть больше 0"
 
         if book_data.page_count <= 0:
-            errors["page_count"] = ["Количество страниц должно быть больше 0"]  # такой формат был раньше
+            errors["page_count"] = "Количество страниц должно быть больше 0"
 
         return errors
 
@@ -150,10 +150,10 @@ class BooksService(BaseService):
         validate_errors = self._get_book_data_errors(book_data=book_data)
 
         if self._get_book_by_name(book_name=book_data.name):
-            validate_errors["name"] = ["Книга с таким названием уже существует"]  # такой формат был раньше
+            validate_errors["name"] = "Книга с таким названием уже существует"
 
         if self._get_book_by_isbn(book_isbn=book_data.isbn):
-            validate_errors["isbn"] = ["Книга с таким ISBN уже существует"]  # такой формат был раньше
+            validate_errors["isbn"] = "Книга с таким ISBN уже существует"
 
         if validate_errors:
             logger.warning(f"Книга не создана, входные данные {book_data}; ошибки валидации: {validate_errors}")
@@ -164,11 +164,11 @@ class BooksService(BaseService):
 
         book_with_same_name = self._get_book_by_name(book_name=book_data.name)
         if book_with_same_name and book_with_same_name.id != book_id:
-            validate_errors["name"] = ["Книга с таким названием уже существует"]  # такой формат был раньше
+            validate_errors["name"] = "Книга с таким названием уже существует"
 
         book_with_same_isbn = self._get_book_by_isbn(book_isbn=book_data.isbn)
         if book_with_same_isbn and book_with_same_isbn.id != book_id:
-            validate_errors["isbn"] = ["Книга с таким ISBN уже существует"]  # такой формат был раньше
+            validate_errors["isbn"] = "Книга с таким ISBN уже существует"
 
         if validate_errors:
             logger.warning(f"Книга {book_id} не изменена, данные {book_data}; ошибки валидации: {validate_errors}")

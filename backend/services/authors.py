@@ -57,7 +57,7 @@ class AuthorsService(BaseService):
     def _validate_author_data(self, author_data: models.AuthorCreate) -> None:
         validate_errors = {}
         if author_data.birth_year <= 0:
-            validate_errors["birth_year"] = ["Год рождения должен быть больше 0"]  # такой формат был раньше
+            validate_errors["birth_year"] = "Год рождения должен быть больше 0"
 
         exist_author = (
             self.session
@@ -70,7 +70,7 @@ class AuthorsService(BaseService):
         )
 
         if exist_author:
-            validate_errors["name"] = ["Автор с такими именем и фамилией уже существует"]  # такой формат был раньше
+            validate_errors["name"] = "Автор с такими именем и фамилией уже существует"
 
         if validate_errors:
             logger.warning(f"Автор не создан, входные данные {author_data}; ошибки валидации: {validate_errors}")

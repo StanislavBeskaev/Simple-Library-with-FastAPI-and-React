@@ -95,7 +95,7 @@ const BookCreate = (props) => {
         if(e?.response) {
           Object.keys(e.response.data).forEach(key => {
             const keyErrorDiv = document.getElementById(`${key}_error`)
-            keyErrorDiv.textContent = e.response.data[key][0]
+            keyErrorDiv.textContent = e.response.data[key]
           })
         } else {
           setError(true)

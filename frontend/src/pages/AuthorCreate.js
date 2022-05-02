@@ -64,7 +64,7 @@ const AuthorCreate = (props) => {
         if(e.response != null){
           Object.keys(e.response.data).forEach(key => {
             const keyErrorDiv = document.getElementById(`${key}_error`)
-            keyErrorDiv.textContent = e.response.data[key][0]
+            keyErrorDiv.textContent = e.response.data[key]
           })
         } else {
           setError(true)
