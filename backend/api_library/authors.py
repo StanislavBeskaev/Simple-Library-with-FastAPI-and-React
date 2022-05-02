@@ -6,6 +6,7 @@ from fastapi import (
 
 from .. import models
 from ..services.authors import AuthorsService
+from .responses.authors import author_create_responses
 
 
 router = APIRouter(
@@ -28,25 +29,7 @@ def get_authors(authors_service: AuthorsService = Depends()):
     "/",
     response_model=models.Author,
     status_code=status.HTTP_201_CREATED,
-    responses={
-        201: {
-            "description": "Успешное создание автора",
-            "content": {
-                "application/json": {
-                    "example": {
-                          "name": "Имя автора",
-                          "surname": "Фамилия автора",
-                          "birth_year": 1234,
-                          "id": 1
-                    }
-                }
-            }
-        },
-        400: {
-            "model": models.AuthorCreateValidationError,
-            "description": "Ошибки валидации данных"
-        }
-    }
+    responses=author_create_responses
 )
 def create_author(
         author_data: models.AuthorCreate,

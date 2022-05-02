@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from .. import models
 from .. import dependencies
 from ..services.books import BooksService
+from .responses.books import get_books_responses
 
 
 router = APIRouter(
@@ -20,36 +21,7 @@ router = APIRouter(
 @router.get(
     "/",
     response_model=models.BookSearchResult,
-    responses={
-        200: {
-            "description": "Найденные книги",
-            "content": {
-                "application/json": {
-                    "example": {
-                        "count": 2,
-                        "results": [
-                            {
-                                "name": "Тестовая книга 90241",
-                                "author": 160,
-                                "isbn": "test_isbn_90241",
-                                "issue_year": 1505,
-                                "page_count": 3,
-                                "id": 90241
-                            },
-                            {
-                                "name": "Тестовая книга 85886",
-                                "author": 493,
-                                "isbn": "test_isbn_85886",
-                                "issue_year": 1569,
-                                "page_count": 4,
-                                "id": 85886
-                            }
-                        ]
-                    }
-                }
-            },
-        },
-    },
+    responses=get_books_responses
 )
 def get_books(
         search_params: dependencies.BookSearchParam = Depends(),
