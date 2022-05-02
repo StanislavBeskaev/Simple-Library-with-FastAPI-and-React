@@ -1,11 +1,10 @@
 from .authors import (
     Author,
-    AuthorCreate
+    AuthorCreate,
 )
 from .books import (
     Book,
     BookCreate,
     BookUpdate,
     BookSearchResult,
-    BookSearchParam
 )

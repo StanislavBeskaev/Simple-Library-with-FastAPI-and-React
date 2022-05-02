@@ -6,16 +6,17 @@ from sqlalchemy.sql.operators import ilike_op, desc_op
 from .. import (
     models,
     tables,
+    dependencies,
 )
 from ..exceptions import LibraryValidationException
-from .base_service import BaseService
+from .base import BaseService
 from .ws_notifications import WSConnectionManager, Notification, NotificationType
 
 
 class BooksService(BaseService):
     """Сервис для работы с книгами"""
 
-    def get_many(self, search_params: models.BookSearchParam) -> models.BookSearchResult:
+    def get_many(self, search_params: dependencies.BookSearchParam) -> models.BookSearchResult:
         """Получение книг с фильтрацией"""
         logger.debug(f"Получение книг, параметры фильтрации: {search_params}")
 
@@ -24,7 +25,7 @@ class BooksService(BaseService):
             results=self.get_books_by_search_params(search_params=search_params)
         )
 
-    def get_books_by_search_params(self, search_params: models.BookSearchParam) -> list[tables.Book]:
+    def get_books_by_search_params(self, search_params: dependencies.BookSearchParam) -> list[tables.Book]:
         books = (
             self._get_search_books_query(search_params=search_params)
             .order_by(desc_op(tables.Book.id))
@@ -105,12 +106,12 @@ class BooksService(BaseService):
 
         return book
 
-    def _get_books_count(self, search_params: models.BookSearchParam) -> int:
+    def _get_books_count(self, search_params: dependencies.BookSearchParam) -> int:
         books_count = self._get_search_books_query(search_params=search_params).count()
 
         return books_count
 
-    def _get_search_books_query(self, search_params: models.BookSearchParam) -> Query:
+    def _get_search_books_query(self, search_params: dependencies.BookSearchParam) -> Query:
         book_query = self.session.query(tables.Book)
 
         if search_params.name:

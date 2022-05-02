@@ -4,7 +4,7 @@ from io import StringIO
 from fastapi import Depends
 from loguru import logger
 
-from .. import models
+from .. import models, dependencies
 from .authors import AuthorsService
 from .books import BooksService
 
@@ -27,7 +27,7 @@ class UnloadService:
 
         return output
 
-    def get_books(self, search_params: models.BookSearchParam):
+    def get_books(self, search_params: dependencies.BookSearchParam):
         """Получение выгрузки книг по переданным параметрам"""
         logger.debug(f"Запрошена выгрузка книг по параметрам: {search_params}")
 

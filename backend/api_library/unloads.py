@@ -4,7 +4,7 @@ from fastapi import (
 )
 from fastapi.responses import StreamingResponse
 
-from .. import models
+from .. import dependencies
 from ..services.unloads import UnloadService
 
 
@@ -28,7 +28,7 @@ def get_authors_unload(unloads_service: UnloadService = Depends()):
 
 @router.get("/books")
 def get_books_unload(
-        search_params: models.BookSearchParam = Depends(),
+        search_params: dependencies.BookSearchParam = Depends(),
         unloads_service: UnloadService = Depends()
 ):
     """Получение json выгрузки книг"""

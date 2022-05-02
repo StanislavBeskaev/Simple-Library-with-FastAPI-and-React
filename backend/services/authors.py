@@ -6,7 +6,7 @@ from .. import (
     tables,
 )
 from ..exceptions import LibraryValidationException
-from .base_service import BaseService
+from .base import BaseService
 from .ws_notifications import WSConnectionManager, Notification, NotificationType
 
 
