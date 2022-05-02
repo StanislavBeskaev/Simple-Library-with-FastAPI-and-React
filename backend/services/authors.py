@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from loguru import logger
 from sqlalchemy.sql.operators import desc_op
 
@@ -51,6 +52,9 @@ class AuthorsService(BaseService):
             .filter(tables.Author.id == author_id)
             .first()
         )
+
+        if not author:
+            raise HTTPException(status_code=404, detail=f"Author with id {author_id} not found")
 
         return author
 

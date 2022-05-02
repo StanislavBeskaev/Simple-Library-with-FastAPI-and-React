@@ -39,10 +39,10 @@ def create_author(
     return authors_service.create(author_data=author_data)
 
 
-# TODO пример
 @router.get(
     "/{author_id}",
-    response_model=models.Author
+    response_model=models.Author,
+    responses=authors_responses.get_detail_author_responses
 )
 def get_author(author_id: int, authors_service: AuthorsService = Depends()):
     """Получение автора по id"""

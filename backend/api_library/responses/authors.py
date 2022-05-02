@@ -1,4 +1,5 @@
 from ... import models
+from . import HTTPError
 
 author_create_responses = {
     201: {
@@ -45,6 +46,33 @@ get_authors_responses = {
                         "id": 7
                     },
                 ]
+            }
+        }
+    }
+}
+
+get_detail_author_responses = {
+    200: {
+        "description": "Информация об авторе",
+        "content": {
+            "application/json": {
+                "example": {
+                    "name": "Александр",
+                    "surname": "Пушкин",
+                    "birth_year": 1799,
+                    "id": 1
+                }
+            }
+        }
+    },
+    404: {
+        "model": HTTPError,
+        "description": "Автор не найден",
+        "content": {
+            "application/json": {
+                "example": {
+                    "detail": "Author with id 404 not found"
+                }
             }
         }
     }

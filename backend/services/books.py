@@ -36,6 +36,7 @@ class BooksService(BaseService):
 
         return books
 
+    # TODO 404 если не найдена
     def get(self, book_id) -> tables.Book:
         book = (
             self.session
