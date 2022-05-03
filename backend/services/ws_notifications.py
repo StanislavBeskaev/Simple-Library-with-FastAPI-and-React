@@ -36,6 +36,7 @@ class WSConnectionManager:
             self.active_connections: list[WebSocket] = []
 
     def send_notification(self, notification: Notification):
+        """Отправка уведомления всем слушателям"""
         asyncio.run(self.broadcast(notification=notification))
 
     async def connect(self, websocket: WebSocket):
