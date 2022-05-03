@@ -19,6 +19,7 @@ class Notification(BaseModel):
 
 
 class WSConnectionManager:
+    """Singleton для обслуживания websocket соединений"""
     __instance = None
 
     def __new__(cls, *args, **kwargs):
@@ -45,10 +46,6 @@ class WSConnectionManager:
 
     def disconnect(self, websocket: WebSocket):
         self.active_connections.remove(websocket)
-
-    # TODO возможно этот метод не нужен
-    async def send_personal_message(self, message: str, websocket: WebSocket):
-        await websocket.send_text(message)
 
     async def broadcast(self, notification: Notification):
         logger.debug(f"{self.__class__.__name__}.broadcast for {len(self.active_connections)=} connection,"

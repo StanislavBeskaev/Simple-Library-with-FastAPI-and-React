@@ -8,10 +8,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from loguru import logger
 
-from .services.init_db import DBInitializer
-from .services.ws_notifications import WSConnectionManager
 from . import api_library
 from .exceptions import LibraryValidationException
+from .services.init_db import DBInitializer
+from .services.ws_notifications import WSConnectionManager
 
 
 app = FastAPI(
@@ -43,6 +43,7 @@ async def library_validation_exception_handler(request, exc: LibraryValidationEx
 
 @app.websocket("/ws/notifications")
 async def websocket_endpoint(websocket: WebSocket):
+    """Endpoint для websocket соединений для уведомлений"""
     manager = WSConnectionManager()
     await manager.connect(websocket)
     try:

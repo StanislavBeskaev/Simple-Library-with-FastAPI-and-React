@@ -9,10 +9,10 @@ from loguru import logger
 from pydantic import parse_file_as, BaseModel
 from sqlalchemy.orm import Session
 
-from ..database import engine, get_session
 from .. import models
-from ..settings import get_settings
 from .. import tables
+from ..database import engine, get_session
+from ..settings import get_settings
 
 
 INIT_DATA_TYPE_VAR = "INIT_DATA_TYPE"
@@ -21,6 +21,7 @@ TEST_INIT_DATA_TYPE_PREFIX = "test"  # в формате test_<кол-во ав�
 
 
 class DBInitializer:
+    """Класс для инициализации базы и заполнения начальными данными"""
 
     def __init__(self):
         self.session = next(get_session())

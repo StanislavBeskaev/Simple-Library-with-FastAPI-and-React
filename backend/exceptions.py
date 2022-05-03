@@ -1,4 +1,6 @@
 class LibraryValidationException(Exception):
+    """Исключение ошибок валидации входных данных"""
+
     def __init__(self, errors: dict) -> None:
         self.errors = errors
 

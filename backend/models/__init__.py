@@ -8,4 +8,5 @@ from .books import (
     BookCreate,
     BookUpdate,
     BookSearchResult,
+    BookValidationError
 )

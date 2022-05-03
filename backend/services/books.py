@@ -1,13 +1,9 @@
-from fastapi import HTTPException, status
+from fastapi import HTTPException
 from loguru import logger
 from sqlalchemy.orm import Query
 from sqlalchemy.sql.operators import ilike_op, desc_op
 
-from .. import (
-    models,
-    tables,
-    dependencies,
-)
+from .. import models, tables, dependencies
 from ..exceptions import LibraryValidationException
 from .base import BaseService
 from .ws_notifications import WSConnectionManager, Notification, NotificationType
@@ -36,14 +32,12 @@ class BooksService(BaseService):
 
         return books
 
-    # TODO 404 если не найдена
     def get(self, book_id) -> tables.Book:
-        book = (
-            self.session
-            .query(tables.Book)
-            .filter(tables.Book.id == book_id)
-            .first()
-        )
+        book = self._get_book_by_id(book_id=book_id)
+
+        if not book:
+            logger.warning(f"Попытка получить информацию о не существующей книге {book_id}")
+            raise HTTPException(status_code=404, detail=f"Book with id {book_id} not found")
 
         return book
 
@@ -67,13 +61,10 @@ class BooksService(BaseService):
 
     def delete(self, book_id) -> None:
         """Удаление книги по id"""
-        book = self.get(book_id=book_id)
+        book = self._get_book_by_id(book_id=book_id)
         if not book:
             logger.warning(f"Попытка удалить не существующую книгу {book_id}")
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Book with id {book_id} not found"
-            )
+            raise HTTPException(status_code=404, detail=f"Book with id {book_id} not found")
 
         self.session.delete(book)
         self.session.commit()
@@ -87,10 +78,10 @@ class BooksService(BaseService):
         """Изменение книги"""
         logger.debug(f"Попытка изменить книгу {book_id}, данные {book_data}")
 
-        book = self.get(book_id=book_id)
+        book = self._get_book_by_id(book_id=book_id)
         if not book:
             logger.warning(f"Попытка изменить не существующую книгу {book_id}")
-            raise HTTPException(status_code=406, detail=f"Book with id {book_id} does not exist")
+            raise HTTPException(status_code=404, detail=f"Book with id {book_id} not found")
 
         self._validate_update_book_data(book_data=book_data, book_id=book_id)
 
@@ -103,6 +94,16 @@ class BooksService(BaseService):
         logger.info(f"Изменена книга {book}, текущие параметры {book}")
         WSConnectionManager().send_notification(
             Notification(type=NotificationType.WARNING, text=f"Изменена книга {book.name}")
+        )
+
+        return book
+
+    def _get_book_by_id(self, book_id) -> tables.Book:
+        book = (
+            self.session
+            .query(tables.Book)
+            .filter(tables.Book.id == book_id)
+            .first()
         )
 
         return book
@@ -188,9 +189,9 @@ class BooksService(BaseService):
     def _get_book_by_isbn(self, book_isbn: str) -> tables.Book | None:
         book = (
             self.session
-                .query(tables.Book)
-                .filter(tables.Book.isbn == book_isbn)
-                .first()
+            .query(tables.Book)
+            .filter(tables.Book.isbn == book_isbn)
+            .first()
         )
 
         return book

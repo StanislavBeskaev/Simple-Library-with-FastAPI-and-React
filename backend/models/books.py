@@ -1,6 +1,3 @@
-from dataclasses import dataclass
-
-from fastapi import Query
 from pydantic import BaseModel, Field
 
 
@@ -30,3 +27,10 @@ class Book(BaseBook):
 class BookSearchResult(BaseModel):
     count: int = Field(..., title="Количество найденных книг")
     results: list[Book] = Field(..., title="Найденные книги")
+
+
+class BookValidationError(BaseModel):
+    name: str = Field("Книга с таким названием уже существует", title="Ошибки валидации названия")
+    isbn: str = Field("Книга с таким ISBN уже существует", title="Ошибки валидации ISBN")
+    issue_year: str = Field("Год выпуска должен быть больше 0", title="Ошибки валидации года выпуска")
+    page_count: str = Field("Количество страниц должно быть больше 0", title="Ошибки валидации количества страниц")

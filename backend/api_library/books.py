@@ -31,10 +31,11 @@ def get_books(
     return books_service.get_many(search_params=search_params)
 
 
-# TODO описание 400 ответа и примеры
 @router.post(
     "/",
-    response_model=models.Book
+    response_model=models.Book,
+    status_code=status.HTTP_201_CREATED,
+    responses=books_responses.book_create_responses
 )
 def create_book(
         book_data: models.BookCreate,
@@ -44,19 +45,20 @@ def create_book(
     return books_service.create(book_data=book_data)
 
 
-# TODO пример
 @router.get(
     "/{book_id}",
-    response_model=models.Book
+    response_model=models.Book,
+    responses=books_responses.get_detail_book_responses
 )
 def get_book(book_id: int = Path(..., description="Id книги"), books_service: BooksService = Depends()):
     """Получение книги по id"""
     return books_service.get(book_id=book_id)
 
 
-# TODO описание 404 ответа и примеры
 @router.delete(
-    "/{book_id}"
+    "/{book_id}",
+    status_code=204,
+    responses=books_responses.book_delete_responses
 )
 def delete_book(book_id: int = Path(..., description="Id книги"), books_service: BooksService = Depends()):
     """Удаление книги по id"""
@@ -65,15 +67,15 @@ def delete_book(book_id: int = Path(..., description="Id книги"), books_ser
     return JSONResponse(content=None, status_code=status.HTTP_204_NO_CONTENT)
 
 
-# TODO описание 406 ответа и примеры
 @router.put(
     "/{book_id}",
-    response_model=models.Book
+    response_model=models.Book,
+    responses=books_responses.book_update_responses
 )
 def update_book(
         book_data: models.BookUpdate,
         book_id: int = Path(..., description="Id книги"),
         books_service: BooksService = Depends()
 ):
-    """Обновление книги"""
+    """Изменение книги"""
     return books_service.update(book_id=book_id, book_data=book_data)
