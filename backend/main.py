@@ -38,6 +38,7 @@ def initialize_db():
 
 @app.exception_handler(LibraryValidationException)
 async def library_validation_exception_handler(request, exc: LibraryValidationException):
+    logger.warning(f"library_validation_exception_handler, исключение: {exc}")
     return JSONResponse(content=exc.errors, status_code=400)
 
 

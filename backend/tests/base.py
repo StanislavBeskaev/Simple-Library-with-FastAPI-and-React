@@ -1,4 +1,4 @@
-from typing import Generator
+from typing import Generator, Any
 from unittest import TestCase
 
 from fastapi.testclient import TestClient
@@ -39,3 +39,7 @@ class BaseTestCase(TestCase):
     @classmethod
     def tearDownClass(cls) -> None:
         app.dependency_overrides = {}
+
+    @staticmethod
+    def with_id_sort(elements: list[Any]) -> list[Any]:
+        return sorted(elements, key=lambda element: element.id, reverse=True)
