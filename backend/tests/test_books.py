@@ -102,7 +102,7 @@ class TestBooks(BaseTestCase):
 
         response = self.client.get(self.books_url, params={"name": "роман"})
         self.assertEqual(response.status_code, 200)
-        searched_books = self._convert_to_dicts(books=test_books[10:15])
+        searched_books = self._convert_to_dicts(books=test_books[10:])
         self._check_books_search_result(
             response=response,
             searched_books=searched_books,
@@ -132,7 +132,7 @@ class TestBooks(BaseTestCase):
 
         response = self.client.get(self.books_url, params={"issue_year__gte": 1590})
         self.assertEqual(response.status_code, 200)
-        searched_books = self._convert_to_dicts(books=[book for book in test_books if book.issue_year >= 1590])
+        searched_books = self._convert_to_dicts(books=[book for book in test_books if 1590 <= book.issue_year])
         self._check_books_search_result(
             response=response,
             searched_books=searched_books,
@@ -146,4 +146,69 @@ class TestBooks(BaseTestCase):
             response=response,
             searched_books=searched_books,
             results_books=searched_books
+        )
+
+    def test_find_books_by_page_count(self):
+        response = self.client.get(self.books_url, params={"page_count__gte": 17, "page_count__lte": 78})
+        self.assertEqual(response.status_code, 200)
+        searched_books = self._convert_to_dicts(books=[
+            book for book in test_books if 17 <= book.page_count <= 79
+        ])
+        self._check_books_search_result(
+            response=response,
+            searched_books=searched_books,
+            results_books=searched_books
+        )
+
+        response = self.client.get(self.books_url, params={"page_count__gte": 29})
+        self.assertEqual(response.status_code, 200)
+        searched_books = self._convert_to_dicts(books=[
+            book for book in test_books if 29 <= book.page_count
+        ])
+        self._check_books_search_result(
+            response=response,
+            searched_books=searched_books,
+            results_books=searched_books
+        )
+
+        response = self.client.get(self.books_url, params={"page_count__lte": 27})
+        self.assertEqual(response.status_code, 200)
+        searched_books = self._convert_to_dicts(books=[
+            book for book in test_books if book.page_count <= 27
+        ])
+        self._check_books_search_result(
+            response=response,
+            searched_books=searched_books,
+            results_books=searched_books
+        )
+
+    def test_find_books_by_author(self):
+        response = self.client.get(self.books_url, params={"author": 1})
+        self.assertEqual(response.status_code, 200)
+        searched_books = self._convert_to_dicts(books=test_books[:5])
+        self._check_books_search_result(
+            response=response,
+            searched_books=searched_books,
+            results_books=searched_books
+
+        )
+
+        response = self.client.get(self.books_url, params={"author": 2})
+        self.assertEqual(response.status_code, 200)
+        searched_books = self._convert_to_dicts(books=test_books[5:10])
+        self._check_books_search_result(
+            response=response,
+            searched_books=searched_books,
+            results_books=searched_books
+
+        )
+
+        response = self.client.get(self.books_url, params={"author": 3})
+        self.assertEqual(response.status_code, 200)
+        searched_books = self._convert_to_dicts(books=test_books[10:])
+        self._check_books_search_result(
+            response=response,
+            searched_books=searched_books,
+            results_books=searched_books
+
         )
