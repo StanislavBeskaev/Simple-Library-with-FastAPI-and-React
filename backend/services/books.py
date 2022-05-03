@@ -5,7 +5,7 @@ from sqlalchemy.sql.operators import ilike_op, desc_op
 
 from .. import models, tables, dependencies
 from ..exceptions import LibraryValidationException
-from .base import BaseService
+from . import BaseService
 from .ws_notifications import WSConnectionManager, Notification, NotificationType
 
 
