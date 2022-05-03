@@ -51,3 +51,11 @@ books.json папки backend/init_data. Формат файлов:
  - REACT_APP_WS_ADDRESS - адрес сервера уведомлений по WS,  в формате <ip>:<port>  
  
 Из корня выполнить команду: `docker-compose up`
+
+## Тесты
+Выполнить `python -m unittest`
+
+## Code coverage
+Собрать статистику покрытия: `coverage run -m unittest`
+Отчёт о покрытии в консоли: `coverage report -m`
+Отчёт о покрытии в html: `coverage html`
