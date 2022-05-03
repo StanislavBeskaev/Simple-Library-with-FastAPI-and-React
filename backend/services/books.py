@@ -39,6 +39,7 @@ class BooksService(BaseService):
             logger.warning(f"Попытка получить информацию о не существующей книге {book_id}")
             raise HTTPException(status_code=404, detail=f"Book with id {book_id} not found")
 
+        logger.debug(f"Получение информации о книге с id {book_id}")
         return book
 
     def create(self, book_data: models.BookCreate) -> tables.Book:
