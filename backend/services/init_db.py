@@ -29,13 +29,15 @@ class DBInitializer:
     def init_db(self):
         tables.Base.metadata.create_all(bind=engine)
 
+        init_data_type = get_settings().init_data_type
+        logger.debug(f"{init_data_type=}")
+
         if not self._need_load_data():
             logger.info("init_db в базе уже есть данные")
             return
 
         logger.info("init_db база пустая")
 
-        init_data_type = get_settings().init_data_type
         if not init_data_type:
             logger.info(f"Не задана переменная окружения {INIT_DATA_TYPE_VAR}."
                         f" Начальные данные в базу не загружаются")
