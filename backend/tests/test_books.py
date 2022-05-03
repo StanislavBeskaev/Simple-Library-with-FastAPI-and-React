@@ -276,6 +276,17 @@ class TestBookCRUD(BaseTestBooks):
                 "id": 16
             }
         )
+        new_book = self._get_book_by_id(16)
+        self.assertEqual(new_book.name, "Новая книга")
+        self.assertEqual(new_book.author, 1)
+        self.assertEqual(new_book.isbn, "new-isbn")
+        self.assertEqual(new_book.issue_year, 1991)
+        self.assertEqual(new_book.page_count, 30)
+
+    @staticmethod
+    def _get_book_by_id(book_id) -> tables.Book:
+        test_session = next(override_get_session())
+        return test_session.query(tables.Book).filter(tables.Book.id == book_id).first()
 
     def test_create_book_failed(self):
         response = self.client.post(
@@ -346,6 +357,155 @@ class TestBookCRUD(BaseTestBooks):
                 "isbn": "tale-isbn-6",
                 "issue_year": 12,
                 "page_count": 14
+            }
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.json(),
+            {
+                'name': 'Книга с таким названием уже существует'
+            }
+        )
+
+    def test_delete_book_success(self):
+        response = self.client.delete(f"{self.books_url}1")
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response.json(), None)
+
+        response = self.client.delete(f"{self.books_url}7")
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response.json(), None)
+
+        response = self.client.delete(f"{self.books_url}15")
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response.json(), None)
+
+    def test_delete_book_failed(self):
+        response = self.client.delete(f"{self.books_url}16")
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json(), {"detail": "Book with id 16 not found"})
+
+        response = self.client.delete(f"{self.books_url}123")
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json(), {"detail": "Book with id 123 not found"})
+
+        response = self.client.delete(f"{self.books_url}12764")
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json(), {"detail": "Book with id 12764 not found"})
+
+    def test_update_book_success(self):
+        response = self.client.put(
+            f"{self.books_url}1",
+            json={
+                "name": "рассказ_1",
+                "author": 2,
+                "isbn": "tale_isbn_1",
+                "issue_year": 1205,
+                "page_count": 11
+            }
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "name": "рассказ_1",
+                "author": 2,
+                "isbn": "tale_isbn_1",
+                "issue_year": 1205,
+                "page_count": 11,
+                "id": 1
+            }
+        )
+        updated_book = self._get_book_by_id(1)
+        self.assertEqual(updated_book.name, "рассказ_1")
+        self.assertEqual(updated_book.author, 2)
+        self.assertEqual(updated_book.isbn, "tale_isbn_1")
+        self.assertEqual(updated_book.issue_year, 1205)
+        self.assertEqual(updated_book.page_count, 11)
+
+    def test_update_book_not_found(self):
+        response = self.client.put(
+            f"{self.books_url}16",
+            json={
+                "name": "рассказ_1",
+                "author": 2,
+                "isbn": "tale_isbn_1",
+                "issue_year": 1205,
+                "page_count": 11
+            }
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json(), {"detail": "Book with id 16 not found"})
+
+    def test_update_book_failed(self):
+        response = self.client.put(
+            f"{self.books_url}1",
+            json={
+                "name": "рассказ 2",
+                "author": 2,
+                "isbn": "tale-isbn-3",
+                "issue_year": -2,
+                "page_count": 0
+            }
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.json(),
+            {
+                'name': 'Книга с таким названием уже существует',
+                'isbn': 'Книга с таким ISBN уже существует',
+                'issue_year': 'Год выпуска должен быть больше 0',
+                'page_count': 'Количество страниц должно быть больше 0'
+            }
+        )
+
+        response = self.client.put(
+            f"{self.books_url}1",
+            json={
+                "name": "рассказ 2",
+                "author": 2,
+                "isbn": "tale-isbn-3",
+                "issue_year": -2,
+                "page_count": 15
+            }
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.json(),
+            {
+                'name': 'Книга с таким названием уже существует',
+                'isbn': 'Книга с таким ISBN уже существует',
+                'issue_year': 'Год выпуска должен быть больше 0'
+            }
+        )
+
+        response = self.client.put(
+            f"{self.books_url}1",
+            json={
+                "name": "рассказ 2",
+                "author": 2,
+                "isbn": "tale-isbn-3",
+                "issue_year": 1565,
+                "page_count": 15
+            }
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.json(),
+            {
+                'name': 'Книга с таким названием уже существует',
+                'isbn': 'Книга с таким ISBN уже существует'
+            }
+        )
+
+        response = self.client.put(
+            f"{self.books_url}1",
+            json={
+                "name": "рассказ 2",
+                "author": 2,
+                "isbn": "tale_isbn_1",
+                "issue_year": 1565,
+                "page_count": 15
             }
         )
         self.assertEqual(response.status_code, 400)

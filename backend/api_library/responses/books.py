@@ -81,7 +81,7 @@ book_delete_responses = {
         "description": "Успешное удаление книги",
         "content": {
             "application/json": {
-                "example": {}
+                "example": None
             }
         }
     },
@@ -92,6 +92,10 @@ book_update_responses = {
     200: {
         "description": "Книга успешно изменена",
         "content": _book_detail_content
+    },
+    400: {
+        "model": models.BookValidationError,
+        "description": "Ошибки валидации данных"
     },
     404: _book_not_found_response
 }
