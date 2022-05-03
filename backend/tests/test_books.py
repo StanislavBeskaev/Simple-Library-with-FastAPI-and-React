@@ -32,6 +32,9 @@ class BaseTestBooks(BaseTestCase):
 
     def setUp(self) -> None:
         test_session = next(override_get_session())
+        test_session.query(tables.Author).delete()
+        test_session.query(tables.Book).delete()
+
         test_session.bulk_save_objects(test_authors)
         test_session.bulk_save_objects(test_books)
         test_session.commit()
@@ -42,21 +45,24 @@ class BaseTestBooks(BaseTestCase):
         test_session.query(tables.Book).delete()
         test_session.commit()
 
+    def convert_to_dicts(self, items: list, model=models.Book) -> list[dict]:
+        return [model.from_orm(book).dict() for book in self.with_id_sort(items)]
+
 
 class TestFindBooks(BaseTestBooks):
     def test_find_books_pagination(self):
         response = self.client.get(self.books_url, params={"page_size": 5, "page": 2})
         self.assertEqual(response.status_code, 200)
-        searched_books = self._convert_to_dicts(books=test_books)
+        searched_books = self.convert_to_dicts(items=test_books)
         self._check_books_search_result(
             response=response,
-            searched_books=self._convert_to_dicts(books=test_books),
+            searched_books=self.convert_to_dicts(items=test_books),
             results_books=searched_books[5:10]
         )
 
         response = self.client.get(self.books_url)
         self.assertEqual(response.status_code, 200)
-        searched_books = self._convert_to_dicts(books=test_books)
+        searched_books = self.convert_to_dicts(items=test_books)
         self._check_books_search_result(
             response=response,
             searched_books=searched_books,
@@ -65,15 +71,12 @@ class TestFindBooks(BaseTestBooks):
 
         response = self.client.get(self.books_url, params={"page_size": 10})
         self.assertEqual(response.status_code, 200)
-        searched_books = self._convert_to_dicts(books=test_books)
+        searched_books = self.convert_to_dicts(items=test_books)
         self._check_books_search_result(
             response=response,
             searched_books=searched_books,
             results_books=searched_books[:10]
         )
-
-    def _convert_to_dicts(self, books: list[tables.Book]) -> list[dict]:
-        return [models.Book.from_orm(book).dict() for book in self.with_id_sort(books)]
 
     def _check_books_search_result(self, response, searched_books: list[dict], results_books: list[dict]):
         expected_books_result = models.BookSearchResult(
@@ -85,7 +88,7 @@ class TestFindBooks(BaseTestBooks):
     def test_find_books_by_name(self):
         response = self.client.get(self.books_url, params={"name": "рассказ"})
         self.assertEqual(response.status_code, 200)
-        searched_books = self._convert_to_dicts(books=test_books[:5])
+        searched_books = self.convert_to_dicts(items=test_books[:5])
         self._check_books_search_result(
             response=response,
             searched_books=searched_books,
@@ -95,7 +98,7 @@ class TestFindBooks(BaseTestBooks):
 
         response = self.client.get(self.books_url, params={"name": "история"})
         self.assertEqual(response.status_code, 200)
-        searched_books = self._convert_to_dicts(books=test_books[5:10])
+        searched_books = self.convert_to_dicts(items=test_books[5:10])
         self._check_books_search_result(
             response=response,
             searched_books=searched_books,
@@ -104,7 +107,7 @@ class TestFindBooks(BaseTestBooks):
 
         response = self.client.get(self.books_url, params={"name": "роман"})
         self.assertEqual(response.status_code, 200)
-        searched_books = self._convert_to_dicts(books=test_books[10:])
+        searched_books = self.convert_to_dicts(items=test_books[10:])
         self._check_books_search_result(
             response=response,
             searched_books=searched_books,
@@ -113,7 +116,7 @@ class TestFindBooks(BaseTestBooks):
 
         response = self.client.get(self.books_url, params={"name": 3})
         self.assertEqual(response.status_code, 200)
-        searched_books = self._convert_to_dicts(books=test_books[2::5])
+        searched_books = self.convert_to_dicts(items=test_books[2::5])
         self._check_books_search_result(
             response=response,
             searched_books=searched_books,
@@ -123,7 +126,7 @@ class TestFindBooks(BaseTestBooks):
     def test_find_books_by_year(self):
         response = self.client.get(self.books_url, params={"issue_year__gte": 1700, "issue_year__lte": 1800})
         self.assertEqual(response.status_code, 200)
-        searched_books = self._convert_to_dicts(books=[
+        searched_books = self.convert_to_dicts(items=[
             book for book in test_books if 1700 <= book.issue_year <= 1800
         ])
         self._check_books_search_result(
@@ -134,7 +137,7 @@ class TestFindBooks(BaseTestBooks):
 
         response = self.client.get(self.books_url, params={"issue_year__gte": 1590})
         self.assertEqual(response.status_code, 200)
-        searched_books = self._convert_to_dicts(books=[book for book in test_books if 1590 <= book.issue_year])
+        searched_books = self.convert_to_dicts(items=[book for book in test_books if 1590 <= book.issue_year])
         self._check_books_search_result(
             response=response,
             searched_books=searched_books,
@@ -143,7 +146,7 @@ class TestFindBooks(BaseTestBooks):
 
         response = self.client.get(self.books_url, params={"issue_year__lte": 1241})
         self.assertEqual(response.status_code, 200)
-        searched_books = self._convert_to_dicts(books=[book for book in test_books if book.issue_year <= 1241])
+        searched_books = self.convert_to_dicts(items=[book for book in test_books if book.issue_year <= 1241])
         self._check_books_search_result(
             response=response,
             searched_books=searched_books,
@@ -153,7 +156,7 @@ class TestFindBooks(BaseTestBooks):
     def test_find_books_by_page_count(self):
         response = self.client.get(self.books_url, params={"page_count__gte": 17, "page_count__lte": 78})
         self.assertEqual(response.status_code, 200)
-        searched_books = self._convert_to_dicts(books=[
+        searched_books = self.convert_to_dicts(items=[
             book for book in test_books if 17 <= book.page_count <= 79
         ])
         self._check_books_search_result(
@@ -164,7 +167,7 @@ class TestFindBooks(BaseTestBooks):
 
         response = self.client.get(self.books_url, params={"page_count__gte": 29})
         self.assertEqual(response.status_code, 200)
-        searched_books = self._convert_to_dicts(books=[
+        searched_books = self.convert_to_dicts(items=[
             book for book in test_books if 29 <= book.page_count
         ])
         self._check_books_search_result(
@@ -175,7 +178,7 @@ class TestFindBooks(BaseTestBooks):
 
         response = self.client.get(self.books_url, params={"page_count__lte": 27})
         self.assertEqual(response.status_code, 200)
-        searched_books = self._convert_to_dicts(books=[
+        searched_books = self.convert_to_dicts(items=[
             book for book in test_books if book.page_count <= 27
         ])
         self._check_books_search_result(
@@ -187,7 +190,7 @@ class TestFindBooks(BaseTestBooks):
     def test_find_books_by_author(self):
         response = self.client.get(self.books_url, params={"author": 1})
         self.assertEqual(response.status_code, 200)
-        searched_books = self._convert_to_dicts(books=test_books[:5])
+        searched_books = self.convert_to_dicts(items=test_books[:5])
         self._check_books_search_result(
             response=response,
             searched_books=searched_books,
@@ -197,7 +200,7 @@ class TestFindBooks(BaseTestBooks):
 
         response = self.client.get(self.books_url, params={"author": 2})
         self.assertEqual(response.status_code, 200)
-        searched_books = self._convert_to_dicts(books=test_books[5:10])
+        searched_books = self.convert_to_dicts(items=test_books[5:10])
         self._check_books_search_result(
             response=response,
             searched_books=searched_books,
@@ -207,7 +210,7 @@ class TestFindBooks(BaseTestBooks):
 
         response = self.client.get(self.books_url, params={"author": 3})
         self.assertEqual(response.status_code, 200)
-        searched_books = self._convert_to_dicts(books=test_books[10:])
+        searched_books = self.convert_to_dicts(items=test_books[10:])
         self._check_books_search_result(
             response=response,
             searched_books=searched_books,
