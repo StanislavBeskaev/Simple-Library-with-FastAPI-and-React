@@ -1,5 +1,5 @@
 import React from "react"
-import {Link} from "react-router-dom"
+import {NavLink} from "react-router-dom"
 
 const Navbar = () => {
 
@@ -11,13 +11,13 @@ const Navbar = () => {
         <div className="container-fluid justify-content-between">
           <ul className="navbar-nav">
             <li className="nav-item">
-              <Link to="/" className="nav-link">Поиск книг</Link>
+              <NavLink to="/" className="nav-link">Поиск книг</NavLink>
             </li>
             <li className="nav-item">
-              <Link to="/create-book" className="nav-link">Добавление книги</Link>
+              <NavLink to="/create-book" className="nav-link">Добавление книги</NavLink>
             </li>
             <li className="nav-item">
-              <Link to="/create-author" className="nav-link">Добавление автора</Link>
+              <NavLink to="/create-author" className="nav-link">Добавление автора</NavLink>
             </li>
           </ul>
         </div>
