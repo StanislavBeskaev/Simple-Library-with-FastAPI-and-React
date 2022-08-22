@@ -4,9 +4,9 @@ from fastapi import (
     status,
 )
 
-from .. import models
-from ..services.authors import AuthorsService
-from .responses import authors as authors_responses
+from backend import models
+from backend.services.authors import AuthorsService
+from backend.api_library.responses import authors as authors_responses
 
 
 router = APIRouter(

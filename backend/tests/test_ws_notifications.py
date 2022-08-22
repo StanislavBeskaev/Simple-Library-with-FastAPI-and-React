@@ -1,9 +1,10 @@
-from .. import tables
-from ..models import AuthorCreate, BookUpdate, BookCreate
-from ..services.authors import AuthorsService
-from ..services.books import BooksService
-from ..services.ws_notifications import Notification, NotificationType
-from .base import BaseTestCase, override_get_session
+from backend import tables
+from backend.db.facade import DBFacade
+from backend.models import AuthorCreate, BookUpdate, BookCreate
+from backend.services.authors import AuthorsService
+from backend.services.books import BooksService
+from backend.services.ws_notifications import Notification, NotificationType
+from backend.tests.base import BaseTestCase, override_get_session
 
 
 test_authors = [
@@ -35,14 +36,15 @@ class TestWSNotifications(BaseTestCase):
 
     def test_author_create_notification(self):
         with self.client.websocket_connect(self.ws_notifications_url) as websocket:
-            authors_service = AuthorsService(session=next(override_get_session()))
+            test_db_facade = DBFacade(session=next(override_get_session()))
+            author_service = AuthorsService(db_facade=test_db_facade)
+
             new_author = AuthorCreate(
                 name="Автор",
                 surname="Новый",
                 birth_year=1767
             )
-            authors_service.create(author_data=new_author)
-
+            author_service.create(author_data=new_author)
             ws_data = websocket.receive_json()
             expected_notification = Notification(
                 type=NotificationType.SUCCESS,

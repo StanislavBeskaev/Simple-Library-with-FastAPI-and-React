@@ -1,26 +1,22 @@
-from fastapi import HTTPException
+from fastapi import Depends
 from loguru import logger
-from sqlalchemy.sql.operators import desc_op
 
-from .. import models, tables
-from ..exceptions import LibraryValidationException
-from . import BaseService
-from .ws_notifications import WSConnectionManager, Notification, NotificationType
+from backend import models, tables
+from backend.db.facade import DBFacadeInterface, get_db_facade
+from backend.exceptions import LibraryValidationException
+from backend.services.ws_notifications import WSConnectionManager, Notification, NotificationType
 
 
-class AuthorsService(BaseService):
+class AuthorsService:
     """Сервис для работы с авторами"""
+    # TODO инициализацию вынести в базовый сервис
+    def __init__(self, db_facade: DBFacadeInterface = Depends(get_db_facade)):
+        self.db_facade = db_facade
 
-    def get_many(self) -> list[tables.Author]:
+    def get_many(self) -> list[models.Author]:
         """Получение всех авторов"""
-        authors = (
-            self.session
-            .query(tables.Author)
-            .order_by(desc_op(tables.Author.id))
-            .all()
-        )
-
-        return authors
+        logger.debug(f"AuthorsService get_many")
+        return self.db_facade.get_all_authors()
 
     def create(self, author_data: models.AuthorCreate) -> tables.Author:
         """Создание автора"""
@@ -28,9 +24,7 @@ class AuthorsService(BaseService):
 
         self._validate_author_data(author_data=author_data)
 
-        author = tables.Author(**author_data.dict())
-        self.session.add(author)
-        self.session.commit()
+        author = self.db_facade.create_author(author_data=author_data)
 
         logger.info(f"Создан новый автор: {author}")
         WSConnectionManager().send_notification(
@@ -42,32 +36,19 @@ class AuthorsService(BaseService):
 
         return author
 
-    def get(self, author_id) -> tables.Author:
-        author = (
-            self.session
-            .query(tables.Author)
-            .filter(tables.Author.id == author_id)
-            .first()
-        )
-
-        if not author:
-            raise HTTPException(status_code=404, detail=f"Author with id {author_id} not found")
-
-        return author
+    def get(self, author_id: int) -> tables.Author:
+        """Получение автора по id"""
+        logger.debug(f"AuthorsService запрос получения автора по id: {author_id}")
+        return self.db_facade.get_author_by_id(author_id=author_id)
 
     def _validate_author_data(self, author_data: models.AuthorCreate) -> None:
         validate_errors = {}
         if author_data.birth_year <= 0:
             validate_errors["birth_year"] = "Год рождения должен быть больше 0"
 
-        exist_author = (
-            self.session
-            .query(tables.Author)
-            .filter(
-                tables.Author.name == author_data.name,
-                tables.Author.surname == author_data.surname
-            )
-            .first()
+        exist_author = self.db_facade.find_author_by_name_and_surname(
+            name=author_data.name,
+            surname=author_data.surname
         )
 
         if exist_author:
