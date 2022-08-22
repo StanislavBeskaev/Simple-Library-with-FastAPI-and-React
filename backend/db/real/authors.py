@@ -4,13 +4,15 @@ from sqlalchemy.sql.operators import desc_op
 from loguru import logger
 
 from backend import models, tables
+from backend.decorators import model_result
 from backend.db.real.base import BaseDAO
 
 
 class AuthorsDao(BaseDAO):
     """Класс для работы с авторами в БД"""
 
-    def get_all_authors(self) -> list[tables.Author]:
+    @model_result(models.Author)
+    def get_all_authors(self) -> list[models.Author]:
         """Получение всех авторов"""
         logger.debug(f"AuthorsDao get_all_authors")
         db_authors = (
@@ -19,10 +21,10 @@ class AuthorsDao(BaseDAO):
             .order_by(desc_op(tables.Author.id))
             .all()
         )
-        authors = [models.Author.from_orm(db_author) for db_author in db_authors]
 
-        return authors
+        return db_authors
 
+    @model_result(models.Author)
     def create_author(self, author_data: models.AuthorCreate) -> models.Author:
         """Создание автора в БД"""
         logger.debug(f"AuthorsDao create_author, {author_data=}")
@@ -30,8 +32,9 @@ class AuthorsDao(BaseDAO):
         self.session.add(db_author)
         self.session.commit()
 
-        return models.Author.from_orm(db_author)
+        return db_author
 
+    @model_result(models.Author)
     def get_author_by_id(self, author_id: int) -> models.Author:
         """Получение автора по id"""
         db_author = (
@@ -45,8 +48,9 @@ class AuthorsDao(BaseDAO):
         if not db_author:
             raise HTTPException(status_code=404, detail=f"Author with id {author_id} not found")
 
-        return models.Author.from_orm(db_author)
+        return db_author
 
+    @model_result(models.Author)
     def find_author_by_name_and_surname(self, name: str, surname: str) -> models.Author | None:
         """Поиск автора по имени и фамилии"""
         candidate = (
@@ -59,7 +63,4 @@ class AuthorsDao(BaseDAO):
             .first()
         )
 
-        if not candidate:
-            return None
-
-        return models.Author.from_orm(candidate)
+        return candidate

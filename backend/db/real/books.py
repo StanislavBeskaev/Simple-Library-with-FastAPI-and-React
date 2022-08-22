@@ -2,6 +2,7 @@ from sqlalchemy.orm import Query
 from sqlalchemy.sql.operators import ilike_op, desc_op
 
 from backend import models, tables
+from backend.decorators import model_result
 from backend.db.real.base import BaseDAO
 from backend.dependencies import BookSearchParam
 
@@ -9,6 +10,7 @@ from backend.dependencies import BookSearchParam
 class BooksDao(BaseDAO):
     """Класс для работы с книгами в БД"""
 
+    @model_result(models.Book)
     def get_books_by_search_params(self, search_params: BookSearchParam) -> list[models.Book]:
         """Получение книг удовлетворяющих поисковым параметрам"""
         db_books = (
@@ -19,8 +21,7 @@ class BooksDao(BaseDAO):
             .all()
         )
 
-        books = [models.Book.from_orm(db_book) for db_book in db_books]
-        return books
+        return db_books
 
     def get_books_count_by_search_params(self, search_params: BookSearchParam) -> int:
         """Получение количества книг удовлетворяющих поисковым параметрам"""
@@ -51,14 +52,12 @@ class BooksDao(BaseDAO):
 
         return book_query
 
+    @model_result(models.Book)
     def find_book_by_id(self, book_id: int) -> models.Book | None:
         """Поиск книги по id"""
         candidate = self._find_book_by_id(book_id=book_id)
 
-        if not candidate:
-            return None
-
-        return models.Book.from_orm(candidate)
+        return candidate
 
     def _find_book_by_id(self, book_id: int) -> tables.Book | None:
         return (
@@ -68,13 +67,14 @@ class BooksDao(BaseDAO):
             .first()
         )
 
+    @model_result(models.Book)
     def create_book(self, book_data: models.BookCreate) -> models.Book:
         """Создание книги"""
         db_book = tables.Book(**book_data.dict())
         self.session.add(db_book)
         self.session.commit()
 
-        return models.Book.from_orm(db_book)
+        return db_book
 
     def delete_book_by_id(self, book_id: int) -> None:
         """Удаление книги по id"""
@@ -83,6 +83,7 @@ class BooksDao(BaseDAO):
         self.session.delete(db_book)
         self.session.commit()
 
+    @model_result(models.Book)
     def change_book(self, book_id: int, book_data: models.BookUpdate) -> models.Book:
         """Изменение книги"""
         db_book = self._find_book_by_id(book_id=book_id)
@@ -92,8 +93,9 @@ class BooksDao(BaseDAO):
         self.session.add(db_book)
         self.session.commit()
 
-        return models.Book.from_orm(db_book)
+        return db_book
 
+    @model_result(models.Book)
     def find_book_by_name(self, book_name: str) -> models.Book | None:
         """Поиск книги по имени"""
         candidate = (
@@ -102,11 +104,10 @@ class BooksDao(BaseDAO):
             .filter(tables.Book.name == book_name)
             .first()
         )
-        if not candidate:
-            return None
 
-        return models.Book.from_orm(candidate)
+        return candidate
 
+    @model_result(models.Book)
     def find_book_by_isbn(self, book_isbn: str) -> models.Book | None:
         """Поиск книги по ISBN"""
         candidate = (
@@ -115,7 +116,4 @@ class BooksDao(BaseDAO):
             .filter(tables.Book.isbn == book_isbn)
             .first()
         )
-        if not candidate:
-            return None
-
-        return models.Book.from_orm(candidate)
+        return candidate
