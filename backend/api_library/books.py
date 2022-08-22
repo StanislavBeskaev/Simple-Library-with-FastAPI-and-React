@@ -6,10 +6,10 @@ from fastapi import (
 )
 from fastapi.responses import JSONResponse
 
-from .. import models
-from .. import dependencies
-from ..services.books import BooksService
-from .responses import books as books_responses
+from backend import models
+from backend import dependencies
+from backend.services.books import BooksService
+from backend.api_library.responses import books as books_responses
 
 
 router = APIRouter(

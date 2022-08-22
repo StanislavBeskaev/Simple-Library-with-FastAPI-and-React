@@ -5,9 +5,9 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from .. import tables
-from ..database import get_session
-from ..main import app
+from backend import tables
+from backend.database import get_session
+from backend.main import app
 
 
 TEST_SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"

@@ -9,10 +9,9 @@ from loguru import logger
 from pydantic import parse_file_as, BaseModel
 from sqlalchemy.orm import Session
 
-from .. import models
-from .. import tables
-from ..database import engine, get_session
-from ..settings import get_settings
+from backend import models, tables
+from backend.database import engine, get_session
+from backend.settings import get_settings
 
 
 INIT_DATA_TYPE_VAR = "INIT_DATA_TYPE"

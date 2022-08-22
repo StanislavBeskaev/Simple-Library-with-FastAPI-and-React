@@ -1,7 +1,7 @@
 import json
 
-from .. import models
-from .test_books import BaseTestBooks, test_books, test_authors
+from backend import models
+from backend.tests.test_books import BaseTestBooks, test_books, test_authors
 
 
 class TestUnloads(BaseTestBooks):

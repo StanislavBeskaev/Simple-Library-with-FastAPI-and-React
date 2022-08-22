@@ -1,25 +1,19 @@
 import json
 from io import StringIO
 
-from fastapi import Depends
 from loguru import logger
 
-from .. import models, dependencies
-from .authors import AuthorsService
-from .books import BooksService
+from backend import dependencies
+from backend.services import BaseService
 
 
-class UnloadService:
+class UnloadService(BaseService):
     """Сервис для выгрузки данных в json"""
-    def __init__(self, books_service: BooksService = Depends(), authors_service: AuthorsService = Depends()):
-        self.authors_service = authors_service
-        self.books_service = books_service
 
     def get_authors(self) -> StringIO:
         """Получение выгрузки всех авторов"""
         logger.debug(f"Запрошена выгрузка авторов")
-
-        authors = [models.Author.from_orm(author).dict() for author in self.authors_service.get_many()]
+        authors = [author.dict() for author in self.db_facade.get_all_authors()]
 
         output = StringIO()
         json.dump(obj=authors, fp=output, indent=2, ensure_ascii=False)
@@ -30,9 +24,7 @@ class UnloadService:
     def get_books(self, search_params: dependencies.BookSearchParam):
         """Получение выгрузки книг по переданным параметрам"""
         logger.debug(f"Запрошена выгрузка книг по параметрам: {search_params}")
-
-        books = [models.Book.from_orm(book).dict()
-                 for book in self.books_service.get_books_by_search_params(search_params=search_params)]
+        books = [book.dict() for book in self.db_facade.get_books_by_search_params(search_params=search_params)]
 
         output = StringIO()
         json.dump(obj=books, fp=output, indent=2, ensure_ascii=False)

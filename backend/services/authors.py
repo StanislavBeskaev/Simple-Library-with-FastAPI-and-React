@@ -1,17 +1,13 @@
-from fastapi import Depends
 from loguru import logger
 
 from backend import models, tables
-from backend.db.facade import DBFacadeInterface, get_db_facade
 from backend.exceptions import LibraryValidationException
+from backend.services import BaseService
 from backend.services.ws_notifications import WSConnectionManager, Notification, NotificationType
 
 
-class AuthorsService:
+class AuthorsService(BaseService):
     """Сервис для работы с авторами"""
-    # TODO инициализацию вынести в базовый сервис
-    def __init__(self, db_facade: DBFacadeInterface = Depends(get_db_facade)):
-        self.db_facade = db_facade
 
     def get_many(self) -> list[models.Author]:
         """Получение всех авторов"""

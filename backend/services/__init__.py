@@ -1,12 +1,11 @@
 from abc import ABC
 
 from fastapi import Depends
-from sqlalchemy.orm import Session
 
-from ..database import get_session
+from backend.db.facade import DBFacadeInterface, get_db_facade
 
 
 class BaseService(ABC):
-    """Базовый сервис"""
-    def __init__(self, session: Session = Depends(get_session)):
-        self.session = session
+    """Базовый сервис, инициализация фасада базы данных"""
+    def __init__(self, db_facade: DBFacadeInterface = Depends(get_db_facade)):
+        self.db_facade = db_facade

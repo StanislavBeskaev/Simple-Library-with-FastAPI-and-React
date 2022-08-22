@@ -55,7 +55,9 @@ class TestWSNotifications(BaseTestCase):
 
     def test_book_delete_notification(self):
         with self.client.websocket_connect(self.ws_notifications_url) as websocket:
-            books_service = BooksService(session=next(override_get_session()))
+            test_db_facade = DBFacade(session=next(override_get_session()))
+            books_service = BooksService(db_facade=test_db_facade)
+
             book_to_delete = test_books[1]
             books_service.delete(book_id=book_to_delete.id)
 
@@ -69,7 +71,9 @@ class TestWSNotifications(BaseTestCase):
 
     def test_book_update_notification(self):
         with self.client.websocket_connect(self.ws_notifications_url) as websocket:
-            books_service = BooksService(session=next(override_get_session()))
+            test_db_facade = DBFacade(session=next(override_get_session()))
+            books_service = BooksService(db_facade=test_db_facade)
+
             book_to_update = test_books[1]
             books_service.update(
                 book_id=book_to_update.id,
@@ -92,7 +96,9 @@ class TestWSNotifications(BaseTestCase):
 
     def test_book_create_notification(self):
         with self.client.websocket_connect(self.ws_notifications_url) as websocket:
-            books_service = BooksService(session=next(override_get_session()))
+            test_db_facade = DBFacade(session=next(override_get_session()))
+            books_service = BooksService(db_facade=test_db_facade)
+
             book_to_create = BookCreate(
                 name="Новая книга",
                 author=1,

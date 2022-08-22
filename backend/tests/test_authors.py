@@ -1,6 +1,5 @@
-from .. import models
-from .. import tables
-from .base import BaseTestCase, override_get_session
+from backend import models, tables
+from backend.tests.base import BaseTestCase, override_get_session
 
 
 test_authors = [
