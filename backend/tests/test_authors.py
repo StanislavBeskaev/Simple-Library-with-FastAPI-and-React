@@ -1,39 +1,48 @@
-from backend import models, tables
-from backend.tests.base import BaseTestCase, override_get_session
+from typing import Any
+from unittest import TestCase
+
+from fastapi.testclient import TestClient
+
+from backend import models
+from backend.db.facade import get_db_facade
+from backend.db.mock.authors import MockAuthorsDao
+from backend.db.mock.facade import mock_get_db_facade
+from backend.main import app
 
 
-test_authors = [
-    tables.Author(id=1, name="Автор", surname="Первый", birth_year=1),
-    tables.Author(id=2, name="Автор", surname="Второй", birth_year=2),
-    tables.Author(id=3, name="Автор", surname="Третий", birth_year=3),
-]
-
-
-class TestAuthors(BaseTestCase):
+# TODO вынести в базовый класс тестов перезапиcь get_db_facade
+class TestAuthors(TestCase):
     authors_url = "/api_library/authors/"
+    client = TestClient(app)
 
-    def setUp(self) -> None:
-        test_session = next(override_get_session())
-        test_session.bulk_save_objects(test_authors)
-        test_session.commit()
+    @classmethod
+    def setUpClass(cls) -> None:
+        app.dependency_overrides[get_db_facade] = mock_get_db_facade
 
-    def tearDown(self) -> None:
-        test_session = next(override_get_session())
-        test_session.query(tables.Author).delete()
-        test_session.commit()
+    @classmethod
+    def tearDownClass(cls) -> None:
+        app.dependency_overrides = {}
+
+    @staticmethod
+    def with_id_sort(elements: list[Any]) -> list[Any]:
+        return sorted(elements, key=lambda element: element.id, reverse=True)
 
     def test_get_authors(self):
         response = self.client.get(self.authors_url)
 
         self.assertEqual(response.status_code, 200)
-        expected_authors = [models.Author.from_orm(author).dict() for author in self.with_id_sort(test_authors)]
+        mock_authors_dao = MockAuthorsDao()
+        expected_authors = [
+            models.Author.from_orm(author).dict() for author in self.with_id_sort(mock_authors_dao.test_authors)
+        ]
         self.assertEqual(expected_authors, response.json())
 
     def test_get_author_success(self):
         response = self.client.get(f"{self.authors_url}1")
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), models.Author.from_orm(test_authors[0]).dict())
+        mock_authors_dao = MockAuthorsDao()
+        self.assertEqual(response.json(), models.Author.from_orm(mock_authors_dao.test_authors[0]).dict())
 
     def test_get_author_not_found(self):
         response = self.client.get(f"{self.authors_url}4")
