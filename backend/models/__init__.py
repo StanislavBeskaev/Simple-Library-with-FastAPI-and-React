@@ -1,9 +1,9 @@
-from .authors import (
+from backend.models.authors import (
     Author,
     AuthorCreate,
     AuthorCreateValidationError
 )
-from .books import (
+from backend.models.books import (
     Book,
     BookCreate,
     BookUpdate,

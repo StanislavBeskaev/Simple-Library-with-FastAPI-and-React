@@ -1,5 +1,5 @@
-from ... import models
-from . import HTTPError
+from backend import models
+from backend.api_library.responses import HTTPError
 
 get_books_responses = {
     200: {

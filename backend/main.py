@@ -8,10 +8,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from loguru import logger
 
-from . import api_library
-from .exceptions import LibraryValidationException
-from .services.init_db import DBInitializer
-from .services.ws_notifications import WSConnectionManager
+from backend import api_library
+from backend.exceptions import LibraryValidationException
+from backend.services.init_db import DBInitializer
+from backend.services.ws_notifications import WSConnectionManager
 
 
 app = FastAPI(
