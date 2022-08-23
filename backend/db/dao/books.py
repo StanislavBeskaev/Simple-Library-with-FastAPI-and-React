@@ -1,13 +1,58 @@
+from abc import ABC, abstractmethod
+
 from sqlalchemy.orm import Query
 from sqlalchemy.sql.operators import ilike_op, desc_op
 
 from backend import models, tables
 from backend.decorators import model_result
-from backend.db.real.base import BaseDAO
+from backend.db.dao.base import BaseDAO
 from backend.dependencies import BookSearchParam
 
 
-class BooksDao(BaseDAO):
+class BooksDaoInterface(ABC):
+    """Интерфейс работы с книгами в БД"""
+
+    @abstractmethod
+    def get_books_by_search_params(self, search_params: BookSearchParam) -> list[models.Book]:
+        """Получение книг удовлетворяющих поисковым параметрам"""
+        ...
+
+    def get_books_count_by_search_params(self, search_params: BookSearchParam) -> int:
+        """Получение количества книг удовлетворяющих поисковым параметрам"""
+        ...
+
+    @abstractmethod
+    def find_book_by_id(self, book_id: int) -> models.Book | None:
+        """Поиск книги по id"""
+        ...
+
+    @abstractmethod
+    def create_book(self, book_data: models.BookCreate) -> models.Book:
+        """Создание книги"""
+        ...
+
+    @abstractmethod
+    def delete_book_by_id(self, book_id: int) -> None:
+        """Удаление книги по id"""
+        ...
+
+    @abstractmethod
+    def change_book(self, book_id: int, book_data: models.BookUpdate) -> models.Book:
+        """Изменение книги"""
+        ...
+
+    @abstractmethod
+    def find_book_by_name(self, book_name: str) -> models.Book | None:
+        """Поиск книги по имени"""
+        ...
+
+    @abstractmethod
+    def find_book_by_isbn(self, book_isbn: str) -> models.Book | None:
+        """Поиск книги по ISBN"""
+        ...
+
+
+class BooksDao(BooksDaoInterface, BaseDAO):
     """Класс для работы с книгами в БД"""
 
     @model_result(models.Book)

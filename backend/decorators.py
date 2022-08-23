@@ -1,3 +1,4 @@
+from functools import wraps
 from typing import Type
 
 from pydantic import BaseModel
@@ -11,7 +12,9 @@ def model_result(model: Type[BaseModel]):
         - Если результат функции список, то преобразование к списку объектов указанной модели
         - Иначе преобразование к объекту указанной модели
     """
+    @wraps(model)
     def decorator(function):
+        @wraps(function)
         def wrapper(*args, **kwargs):
             result = function(*args, **kwargs)
             if result is None:

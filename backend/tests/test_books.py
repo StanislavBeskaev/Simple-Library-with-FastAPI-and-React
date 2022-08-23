@@ -1,50 +1,35 @@
 from typing import Any
+from unittest import TestCase
+
+from fastapi.testclient import TestClient
 
 from backend import models, tables
-from backend.tests.base import BaseTestCase, override_get_session
-
-test_authors = [
-    tables.Author(id=1, name="Автор", surname="Первый", birth_year=1),
-    tables.Author(id=2, name="Автор", surname="Второй", birth_year=2),
-    tables.Author(id=3, name="Автор", surname="Третий", birth_year=3),
-]
-
-test_books = [
-    tables.Book(id=1, name="рассказ 1", author=1, isbn="tale-isbn-1", issue_year=1203, page_count=12),
-    tables.Book(id=2, name="рассказ 2", author=1, isbn="tale-isbn-2", issue_year=1590, page_count=14),
-    tables.Book(id=3, name="рассказ 3", author=1, isbn="tale-isbn-3", issue_year=768, page_count=19),
-    tables.Book(id=4, name="рассказ 4", author=1, isbn="tale-isbn-4", issue_year=1867, page_count=17),
-    tables.Book(id=5, name="рассказ 5", author=1, isbn="tale-isbn-5", issue_year=1917, page_count=9),
-    tables.Book(id=6, name="история 1", author=2, isbn="history-isbn-1", issue_year=1241, page_count=20),
-    tables.Book(id=7, name="история 2", author=2, isbn="history-isbn-2", issue_year=1, page_count=39),
-    tables.Book(id=8, name="история 3", author=2, isbn="history-isbn-3", issue_year=1913, page_count=33),
-    tables.Book(id=9, name="история 4", author=2, isbn="history-isbn-4", issue_year=1171, page_count=27),
-    tables.Book(id=10, name="история 5", author=2, isbn="history-isbn-5", issue_year=1764, page_count=29),
-    tables.Book(id=11, name="роман 1", author=3, isbn="novel-isbn-1", issue_year=1712, page_count=40),
-    tables.Book(id=12, name="роман 2", author=3, isbn="novel-isbn-2", issue_year=1812, page_count=112),
-    tables.Book(id=13, name="роман 3", author=3, isbn="novel-isbn-3", issue_year=1912, page_count=150),
-    tables.Book(id=14, name="роман 4", author=3, isbn="novel-isbn-4", issue_year=2012, page_count=78),
-    tables.Book(id=15, name="роман 5", author=3, isbn="novel-isbn-5", issue_year=1692, page_count=201),
-]
+from backend.db.facade import get_db_facade
+from backend.db.mock.facade import mock_get_db_facade
+from backend.db.mock.books import MockBooksDao
+from backend.main import app
+from backend.tests.base import override_get_session
 
 
-class BaseTestBooks(BaseTestCase):
+test_books = MockBooksDao().test_books
+
+
+class BaseTestBooks(TestCase):
     books_url = "/api_library/books/"
+    client = TestClient(app)
 
-    def setUp(self) -> None:
-        test_session = next(override_get_session())
-        test_session.query(tables.Author).delete()
-        test_session.query(tables.Book).delete()
+    @classmethod
+    def setUpClass(cls) -> None:
+        app.dependency_overrides[get_db_facade] = mock_get_db_facade
 
-        test_session.bulk_save_objects(test_authors)
-        test_session.bulk_save_objects(test_books)
-        test_session.commit()
+    @classmethod
+    def tearDownClass(cls) -> None:
+        app.dependency_overrides = {}
 
-    def tearDown(self) -> None:
-        test_session = next(override_get_session())
-        test_session.query(tables.Author).delete()
-        test_session.query(tables.Book).delete()
-        test_session.commit()
+    # TODO вынести в базовый класс тестов
+    @staticmethod
+    def with_id_sort(elements: list[Any]) -> list[Any]:
+        return sorted(elements, key=lambda element: element.id, reverse=True)
 
     def convert_to_dicts(self, items: list, model=models.Book) -> list[dict]:
         return [model.from_orm(book).dict() for book in self.with_id_sort(items)]

@@ -1,14 +1,39 @@
-from fastapi import HTTPException
-from sqlalchemy.sql.operators import desc_op
+from abc import ABC, abstractmethod
 
+from fastapi import HTTPException
 from loguru import logger
+from sqlalchemy.sql.operators import desc_op
 
 from backend import models, tables
 from backend.decorators import model_result
-from backend.db.real.base import BaseDAO
+from backend.db.dao.base import BaseDAO
 
 
-class AuthorsDao(BaseDAO):
+class AuthorsDaoInterface(ABC):
+    """Интерфейс работы с авторами в БД"""
+
+    @abstractmethod
+    def get_all_authors(self) -> list[models.Author]:
+        """Получение всех авторов"""
+        ...
+
+    @abstractmethod
+    def create_author(self, author_data: models.AuthorCreate) -> models.Author:
+        """Создание автора в БД"""
+        ...
+
+    @abstractmethod
+    def get_author_by_id(self, author_id: int) -> models.Author:
+        """Получение автора по id"""
+        ...
+
+    @abstractmethod
+    def find_author_by_name_and_surname(self, name: str, surname: str) -> models.Author | None:
+        """Поиск автора по имени и фамилии"""
+        ...
+
+
+class AuthorsDao(AuthorsDaoInterface, BaseDAO):
     """Класс для работы с авторами в БД"""
 
     @model_result(models.Author)

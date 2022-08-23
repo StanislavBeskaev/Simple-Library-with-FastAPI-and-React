@@ -23,6 +23,7 @@ class TestAuthors(TestCase):
     def tearDownClass(cls) -> None:
         app.dependency_overrides = {}
 
+    # TODO вынести в базовый класс тестов
     @staticmethod
     def with_id_sort(elements: list[Any]) -> list[Any]:
         return sorted(elements, key=lambda element: element.id, reverse=True)

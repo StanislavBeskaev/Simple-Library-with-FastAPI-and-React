@@ -4,8 +4,8 @@ from fastapi import Depends
 
 from backend import models
 from backend.database import Session, get_session
-from backend.db.real.authors import AuthorsDao
-from backend.db.real.books import BooksDao
+from backend.db.dao.authors import AuthorsDao
+from backend.db.dao.books import BooksDao
 from backend.dependencies import BookSearchParam
 
 

@@ -2,10 +2,10 @@ from fastapi import HTTPException
 
 from backend import models, tables
 from backend.decorators import model_result
+from backend.db.dao.authors import AuthorsDaoInterface
 
 
-# TODO сделать ли интерфейс для AuthorsDao?
-class MockAuthorsDao:
+class MockAuthorsDao(AuthorsDaoInterface):
     """Mock класс для работы с авторами в БД"""
     test_authors = [
         tables.Author(id=1, name="Автор", surname="Первый", birth_year=1),

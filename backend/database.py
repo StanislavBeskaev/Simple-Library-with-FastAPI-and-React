@@ -1,3 +1,4 @@
+from loguru import logger
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -14,6 +15,7 @@ Session = sessionmaker(
 
 
 def get_session():
+    logger.debug("call get_session")
     session = Session()
     try:
         yield session
