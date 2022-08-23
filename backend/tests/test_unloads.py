@@ -1,10 +1,16 @@
 import json
 
 from backend import models
-from backend.tests.test_books import BaseTestBooks, test_books, test_authors
+from backend.db.mock.authors import MockAuthorsDao
+from backend.db.mock.books import MockBooksDao
+from backend.tests.base import BaseLibraryTestCase
 
 
-class TestUnloads(BaseTestBooks):
+test_authors = MockAuthorsDao().test_authors
+test_books = MockBooksDao().test_books
+
+
+class TestUnloads(BaseLibraryTestCase):
 
     def test_authors_unload(self):
         response = self.client.get("/api_library/unloads/authors")

@@ -1,38 +1,15 @@
 from typing import Any
-from unittest import TestCase
 
-from fastapi.testclient import TestClient
-
-from backend import models, tables
-from backend.db.facade import get_db_facade
-from backend.db.mock.facade import mock_get_db_facade
+from backend import models
 from backend.db.mock.books import MockBooksDao
-from backend.main import app
-from backend.tests.base import override_get_session
+from backend.tests.base import BaseLibraryTestCase
 
 
 test_books = MockBooksDao().test_books
 
 
-class BaseTestBooks(TestCase):
+class BaseTestBooks(BaseLibraryTestCase):
     books_url = "/api_library/books/"
-    client = TestClient(app)
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        app.dependency_overrides[get_db_facade] = mock_get_db_facade
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        app.dependency_overrides = {}
-
-    # TODO вынести в базовый класс тестов
-    @staticmethod
-    def with_id_sort(elements: list[Any]) -> list[Any]:
-        return sorted(elements, key=lambda element: element.id, reverse=True)
-
-    def convert_to_dicts(self, items: list, model=models.Book) -> list[dict]:
-        return [model.from_orm(book).dict() for book in self.with_id_sort(items)]
 
 
 class TestFindBooks(BaseTestBooks):
@@ -248,17 +225,6 @@ class TestBookCRUD(BaseTestBooks):
                 "id": 16
             }
         )
-        new_book = self._get_book_by_id(16)
-        self.assertEqual(new_book.name, "Новая книга")
-        self.assertEqual(new_book.author, 1)
-        self.assertEqual(new_book.isbn, "new-isbn")
-        self.assertEqual(new_book.issue_year, 1991)
-        self.assertEqual(new_book.page_count, 30)
-
-    @staticmethod
-    def _get_book_by_id(book_id) -> tables.Book:
-        test_session = next(override_get_session())
-        return test_session.query(tables.Book).filter(tables.Book.id == book_id).first()
 
     def test_create_book_failed(self):
         response = self.client.post(
@@ -388,12 +354,6 @@ class TestBookCRUD(BaseTestBooks):
                 "id": 1
             }
         )
-        updated_book = self._get_book_by_id(1)
-        self.assertEqual(updated_book.name, "рассказ_1")
-        self.assertEqual(updated_book.author, 2)
-        self.assertEqual(updated_book.isbn, "tale_isbn_1")
-        self.assertEqual(updated_book.issue_year, 1205)
-        self.assertEqual(updated_book.page_count, 11)
 
     def test_update_book_not_found(self):
         response = self.client.put(

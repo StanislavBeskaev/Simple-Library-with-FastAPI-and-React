@@ -1,3 +1,7 @@
+from copy import deepcopy
+
+from loguru import logger
+
 from backend import models, tables
 from backend.db.dao.books import BooksDaoInterface
 from backend.decorators import model_result
@@ -32,6 +36,16 @@ class MockBooksDao(BooksDaoInterface):
 
     @model_result(models.Book)
     def get_books_by_search_params(self, search_params: BookSearchParam) -> list[models.Book]:
+        result = self._get_books_by_search_params(search_params=search_params)
+
+        start = (search_params.page - 1) * search_params.page_size
+        end = start + search_params.page_size
+        logger.debug(f"get_books_by_search_params {start=} {end=}")
+
+        result = result[start:end]
+        return result
+
+    def _get_books_by_search_params(self, search_params: BookSearchParam) -> list[tables.Book]:
         result = sorted(self.test_books, key=lambda book: book.id, reverse=True)
 
         if search_params.name:
@@ -46,19 +60,16 @@ class MockBooksDao(BooksDaoInterface):
         if search_params.page_count_gte:
             result = [book for book in result if book.page_count >= search_params.page_count_gte]
 
-        if search_params.issue_year_lte:
+        if search_params.page_count_lte:
             result = [book for book in result if book.page_count <= search_params.page_count_lte]
 
         if search_params.author:
             result = [book for book in result if book.author == search_params.author]
 
-        start = (search_params.page - 1) * search_params.page_size
-        end = start + search_params.page_size
-
-        return result[start: end]
+        return result
 
     def get_books_count_by_search_params(self, search_params: BookSearchParam) -> int:
-        return len(self.get_books_by_search_params(search_params=search_params))
+        return len(self._get_books_by_search_params(search_params=search_params))
 
     @model_result(models.Book)
     def find_book_by_id(self, book_id: int) -> models.Book | None:
@@ -74,20 +85,17 @@ class MockBooksDao(BooksDaoInterface):
 
     @model_result(models.Book)
     def create_book(self, book_data: models.BookCreate) -> models.Book:
-        db_book = tables.Book(**book_data.dict())
-        # TODO проверить ли добавление книги в список?
+        db_book = tables.Book(**book_data.dict(), id=len(self.test_books) + 1)
         return db_book
 
     def delete_book_by_id(self, book_id: int) -> None:
-        # TODO проверить ли удалении книги из списка?
         pass
 
     @model_result(models.Book)
     def change_book(self, book_id: int, book_data: models.BookUpdate) -> models.Book:
-        db_book = self._find_book_by_id(book_id=book_id)
+        db_book = deepcopy(self._find_book_by_id(book_id=book_id))
         for attr, value in vars(book_data).items():
             setattr(db_book, attr, value)
-        # TODO проверить ли изменение книги в списке?
         return db_book
 
     @model_result(models.Book)

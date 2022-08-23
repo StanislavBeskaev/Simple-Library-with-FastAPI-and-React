@@ -1,40 +1,21 @@
-from typing import Generator, Any
+from typing import Any
 from unittest import TestCase
 
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
 
-from backend import tables
-from backend.database import get_session
+from backend import models
+from backend.db.facade import get_db_facade
+from backend.db.mock.facade import mock_get_db_facade
 from backend.main import app
 
 
-TEST_SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
-
-engine = create_engine(
-    TEST_SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-tables.Base.metadata.create_all(bind=engine)
-
-
-def override_get_session() -> Generator[Session, None, None]:
-    test_session = TestingSessionLocal()
-    try:
-        yield test_session
-    finally:
-        test_session.close()
-
-
-class BaseTestCase(TestCase):
+class BaseLibraryTestCase(TestCase):
+    """Базовый класс для тестов библиотеки"""
     client = TestClient(app)
 
     @classmethod
     def setUpClass(cls) -> None:
-        app.dependency_overrides[get_session] = override_get_session
+        app.dependency_overrides[get_db_facade] = mock_get_db_facade
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -43,3 +24,6 @@ class BaseTestCase(TestCase):
     @staticmethod
     def with_id_sort(elements: list[Any]) -> list[Any]:
         return sorted(elements, key=lambda element: element.id, reverse=True)
+
+    def convert_to_dicts(self, items: list, model=models.Book) -> list[dict]:
+        return [model.from_orm(book).dict() for book in self.with_id_sort(items)]

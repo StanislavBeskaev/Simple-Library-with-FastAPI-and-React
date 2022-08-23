@@ -69,7 +69,6 @@ class AuthorsDao(AuthorsDaoInterface, BaseDAO):
                 .first()
         )
 
-        # TODO подумать, может кидать DB исключение?
         if not db_author:
             raise HTTPException(status_code=404, detail=f"Author with id {author_id} not found")
 

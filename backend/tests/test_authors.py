@@ -1,32 +1,10 @@
-from typing import Any
-from unittest import TestCase
-
-from fastapi.testclient import TestClient
-
 from backend import models
-from backend.db.facade import get_db_facade
 from backend.db.mock.authors import MockAuthorsDao
-from backend.db.mock.facade import mock_get_db_facade
-from backend.main import app
+from backend.tests.base import BaseLibraryTestCase
 
 
-# TODO вынести в базовый класс тестов перезапиcь get_db_facade
-class TestAuthors(TestCase):
+class TestAuthors(BaseLibraryTestCase):
     authors_url = "/api_library/authors/"
-    client = TestClient(app)
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        app.dependency_overrides[get_db_facade] = mock_get_db_facade
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        app.dependency_overrides = {}
-
-    # TODO вынести в базовый класс тестов
-    @staticmethod
-    def with_id_sort(elements: list[Any]) -> list[Any]:
-        return sorted(elements, key=lambda element: element.id, reverse=True)
 
     def test_get_authors(self):
         response = self.client.get(self.authors_url)

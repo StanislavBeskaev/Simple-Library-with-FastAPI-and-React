@@ -118,7 +118,6 @@ class DBFacade(DBFacadeInterface):
         return self.books_dao.find_book_by_isbn(book_isbn=book_isbn)
 
 
-#  TODO в тестах подменить, что бы возвращало тестовый фасад
 def get_db_facade(db_facade: DBFacade = Depends(DBFacade)) -> DBFacadeInterface:
     """Зависимость для получения фасада БД"""
     return db_facade

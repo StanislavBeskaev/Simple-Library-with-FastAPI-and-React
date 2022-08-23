@@ -20,7 +20,6 @@ class MockAuthorsDao(AuthorsDaoInterface):
     @model_result(models.Author)
     def create_author(self, author_data: models.AuthorCreate) -> models.Author:
         mock_author = tables.Author(**author_data.dict(), id=4)
-        # TODO проверить ли добавление автора в список?
         return mock_author
 
     @model_result(models.Author)

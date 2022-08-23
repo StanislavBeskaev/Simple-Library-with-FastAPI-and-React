@@ -1,43 +1,18 @@
-from backend import tables
-from backend.db.facade import DBFacade
+from backend.db.mock.facade import MockDBFacade
+from backend.db.mock.books import MockBooksDao
 from backend.models import AuthorCreate, BookUpdate, BookCreate
 from backend.services.authors import AuthorsService
 from backend.services.books import BooksService
 from backend.services.ws_notifications import Notification, NotificationType
-from backend.tests.base import BaseTestCase, override_get_session
+from backend.tests.base import BaseLibraryTestCase
 
 
-test_authors = [
-    tables.Author(id=1, name="Автор", surname="Первый", birth_year=1),
-
-]
-
-test_books = [
-    tables.Book(id=1, name="Книга 1", author=1, isbn="isbn-1", issue_year=1111, page_count=11),
-    tables.Book(id=2, name="Книга 2", author=1, isbn="isbn-2", issue_year=2222, page_count=12),
-    tables.Book(id=3, name="Книга 3", author=1, isbn="isbn-3", issue_year=3333, page_count=13),
-]
-
-
-class TestWSNotifications(BaseTestCase):
+class TestWSNotifications(BaseLibraryTestCase):
     ws_notifications_url = "/ws/notifications"
-
-    def setUp(self) -> None:
-        test_session = next(override_get_session())
-        test_session.bulk_save_objects(test_authors)
-        test_session.bulk_save_objects(test_books)
-        test_session.commit()
-
-    def tearDown(self) -> None:
-        test_session = next(override_get_session())
-        test_session.query(tables.Author).delete()
-        test_session.query(tables.Book).delete()
-        test_session.commit()
 
     def test_author_create_notification(self):
         with self.client.websocket_connect(self.ws_notifications_url) as websocket:
-            test_db_facade = DBFacade(session=next(override_get_session()))
-            author_service = AuthorsService(db_facade=test_db_facade)
+            author_service = AuthorsService(db_facade=MockDBFacade())
 
             new_author = AuthorCreate(
                 name="Автор",
@@ -55,26 +30,24 @@ class TestWSNotifications(BaseTestCase):
 
     def test_book_delete_notification(self):
         with self.client.websocket_connect(self.ws_notifications_url) as websocket:
-            test_db_facade = DBFacade(session=next(override_get_session()))
-            books_service = BooksService(db_facade=test_db_facade)
+            books_service = BooksService(db_facade=MockDBFacade())
 
-            book_to_delete = test_books[1]
-            books_service.delete(book_id=book_to_delete.id)
+            books_service.delete(book_id=1)
 
             ws_data = websocket.receive_json()
             expected_notification = Notification(
                 type=NotificationType.ERROR,
-                text=f"Удалена книга {book_to_delete.name}"
+                text=f"Удалена книга рассказ 1"
             ).dict()
 
             self.assertEqual(ws_data, expected_notification)
 
     def test_book_update_notification(self):
         with self.client.websocket_connect(self.ws_notifications_url) as websocket:
-            test_db_facade = DBFacade(session=next(override_get_session()))
-            books_service = BooksService(db_facade=test_db_facade)
+            books_service = BooksService(db_facade=MockDBFacade())
+            mock_books_dao = MockBooksDao()
+            book_to_update = mock_books_dao.test_books[1]
 
-            book_to_update = test_books[1]
             books_service.update(
                 book_id=book_to_update.id,
                 book_data=BookUpdate(
@@ -96,8 +69,7 @@ class TestWSNotifications(BaseTestCase):
 
     def test_book_create_notification(self):
         with self.client.websocket_connect(self.ws_notifications_url) as websocket:
-            test_db_facade = DBFacade(session=next(override_get_session()))
-            books_service = BooksService(db_facade=test_db_facade)
+            books_service = BooksService(db_facade=MockDBFacade())
 
             book_to_create = BookCreate(
                 name="Новая книга",
