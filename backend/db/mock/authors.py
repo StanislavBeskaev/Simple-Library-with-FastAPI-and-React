@@ -6,7 +6,7 @@ from backend.db.dao.authors import AuthorsDaoInterface
 
 
 class MockAuthorsDao(AuthorsDaoInterface):
-    """Mock класс для работы с авторами в БД"""
+    """Mock класс для тестов для работы с авторами в БД"""
     test_authors = [
         tables.Author(id=1, name="Автор", surname="Первый", birth_year=1),
         tables.Author(id=2, name="Автор", surname="Второй", birth_year=2),

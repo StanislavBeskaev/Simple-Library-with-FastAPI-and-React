@@ -33,6 +33,7 @@ app.include_router(api_library.router)
 
 @app.on_event("startup")
 def initialize_db():
+    logger.info("Старт API")
     DBInitializer().init_db()
 
 
@@ -44,7 +45,7 @@ async def library_validation_exception_handler(request, exc: LibraryValidationEx
 
 @app.websocket("/ws/notifications")
 async def websocket_endpoint(websocket: WebSocket):
-    """Endpoint для websocket соединений для уведомлений"""
+    """Endpoint websocket соединений для уведомлений"""
     manager = WSConnectionManager()
     await manager.connect(websocket)
     try:

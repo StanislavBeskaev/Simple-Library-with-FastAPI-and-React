@@ -14,6 +14,7 @@ class NotificationType(str, Enum):
 
 
 class Notification(BaseModel):
+    """Объект уведомления для ws"""
     type: NotificationType
     text: str
 

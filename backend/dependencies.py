@@ -5,6 +5,7 @@ from fastapi import Query
 
 @dataclass
 class BookSearchParam:
+    """Параметры для поиска книг"""
     name: str = Query(None, description="Строка в названии книги(без учёта регистра)")
     issue_year_gte: int = Query(None, alias="issue_year__gte", description="Год выпуска от")
     issue_year_lte: int = Query(None, alias="issue_year__lte", description="Год выпуска до")

@@ -22,8 +22,9 @@ class BaseLibraryTestCase(TestCase):
         app.dependency_overrides = {}
 
     @staticmethod
-    def with_id_sort(elements: list[Any]) -> list[Any]:
+    def with_desc_id_sort(elements: list[Any]) -> list[Any]:
+        """Сортировка элементов в убывающем порядке по id"""
         return sorted(elements, key=lambda element: element.id, reverse=True)
 
     def convert_to_dicts(self, items: list, model=models.Book) -> list[dict]:
-        return [model.from_orm(book).dict() for book in self.with_id_sort(items)]
+        return [model.from_orm(book).dict() for book in self.with_desc_id_sort(items)]

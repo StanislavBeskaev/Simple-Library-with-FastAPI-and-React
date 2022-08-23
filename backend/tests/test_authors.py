@@ -12,7 +12,7 @@ class TestAuthors(BaseLibraryTestCase):
         self.assertEqual(response.status_code, 200)
         mock_authors_dao = MockAuthorsDao()
         expected_authors = [
-            models.Author.from_orm(author).dict() for author in self.with_id_sort(mock_authors_dao.test_authors)
+            models.Author.from_orm(author).dict() for author in self.with_desc_id_sort(mock_authors_dao.test_authors)
         ]
         self.assertEqual(expected_authors, response.json())
 

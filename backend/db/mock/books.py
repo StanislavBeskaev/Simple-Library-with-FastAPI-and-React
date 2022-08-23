@@ -9,7 +9,7 @@ from backend.dependencies import BookSearchParam
 
 
 class MockBooksDao(BooksDaoInterface):
-    """Mock класс для работы с книгами в БД"""
+    """Mock класс для тестов для работы с книгами в БД"""
     test_authors = [
         tables.Author(id=1, name="Автор", surname="Первый", birth_year=1),
         tables.Author(id=2, name="Автор", surname="Второй", birth_year=2),
