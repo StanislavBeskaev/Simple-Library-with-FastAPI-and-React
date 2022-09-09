@@ -1,10 +1,12 @@
 from functools import wraps
-from typing import Type
-
-from pydantic import BaseModel
+from typing import Callable, Type, TypeVar
 
 
-def model_result(model: Type[BaseModel]):
+Model = TypeVar("Model")
+Result = Model | list[Model] | None
+
+
+def model_result(model: Type[Model]) -> Callable[[Callable[..., Result]], Callable[..., Result]]:
     """
     Декоратор для преобразования результата функции в объект/объекты модели
     pydantic(для модели должен быть включён orm_mode):
@@ -13,9 +15,9 @@ def model_result(model: Type[BaseModel]):
         - Иначе преобразование к объекту указанной модели
     """
     @wraps(model)
-    def decorator(function):
+    def decorator(function: Callable[..., Result]):
         @wraps(function)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs) -> Result:
             result = function(*args, **kwargs)
             if result is None:
                 return result
